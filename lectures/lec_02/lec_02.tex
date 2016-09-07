@@ -1,0 +1,149 @@
+\title{Multicore Computing Lecture 2}
+
+\author{
+        Chunheng Luo \\
+}
+
+\date{\today}
+
+\documentclass[12pt]{article}
+\setlength{\parindent}{0em} 
+\setlength{\parskip}{1em}
+\renewcommand{\baselinestretch}{1.0} 
+\usepackage{listings}
+\usepackage{color}
+
+\begin{document}
+\maketitle
+
+\section{Implementing Threads in Java}
+\begin{enumerate}
+\item Extend the Thread interface $\rightarrow$ start
+
+\item Implement Runnable/Callable $\rightarrow$ create threads $\rightarrow$ start
+
+[Example: FooBar.java]
+
+\item Executor services 
+
+
+\textbf{Synchronous vs. asynchronous multithreading } 
+When you execute something synchronously, you wait for it to finish before
+moving on to another task. When you execute something asynchronously, you can
+move on to another task before it finishes. 
+
+\begin{itemize}
+\item Synchronous execution 
+
+\textit{Using the ``join'' method: blocking construct} \\
+Wait for all running threads to finish using join, and then start new threads. 
+
+[Example: Fibonacci.java]
+
+\item Asynchronous execution 
+
+\begin{itemize}
+\item Using ExecutorService and ThreadPool \\
+Submit threads to a thread pool, which manages the execution of all threads.
+Asynchronous execution is supported. 
+Each submitted thread returns an object of ``future'' type, which represents the output of the
+thread that has not been available at the moment. The ``get'' method of the
+``future'' method waits until the thread finishes and then retrieves the final
+result. 
+
+[Example: Fibonacci2.java] \\
+
+\item Using RecursiveTask \textit{to ``fork'' and ``join'' threads} \\
+The method ``fork'' arranges to asynchronously execute the task in the pool
+the current task is running in. 
+[Example: Fibonacci3.java]  \\
+\begin{lstlisting}[language=Java]
+  protected Integer compute() {
+    if ((n == 0)||(n == 1 )) return 1;
+    Fibonacci3 f1 = new Fibonacci3(n - 1);
+    f1.fork();
+    Fibonacci3 f2 = new Fibonacci3(n - 2);
+    return f2.compute() + f1.join();
+  }
+  /* 
+   * By directly compute f2 first, the result of 
+   * Fibonacci3(n-2) is reused in the computation 
+   * of Fibonacci3(n-1), which is done during f1.join()
+  */
+\end{lstlisting} 
+\end{itemize}
+\end{itemize}
+\end{enumerate} 
+
+\section{Amdahl's Law} 
+$P$: fraction of the work that can be done in parallel \\
+$n$: number of cores \\
+$T_s$: time on sequential processor \\
+$T_p$: time on multicore machine \\
+
+$$T_p\geq(1-P)T_s+\frac{PT_s}{n}$$ 
+
+The speedup is 
+$$\frac{T_s}{T_p}\leq\frac{1}{1-P+\frac{P}{n}}$$
+
+\section{Mutual Exclusion} 
+If any core is in a crital section (CS), all other cores should not be in the
+critical section 
+
+Example: two cores are both doing x:=x+1, they cannot do it at the same time.
+(Wrong values can be wirtten into the mem otherwise. ) 
+
+\textbf{Some tentative solutions: } 
+\begin{itemize} 
+\item Attemp1.java  \\ 
+Several threads can ``lock the door'' simultaneously, which violates the mutual
+exclusion requirement.  
+\item Attemp2.java \\
+If all threads request CS simultaneously, none will enter CS. That is called a
+deadlock. 
+\item Attemp3.java \\ 
+If all threads assign the variable ``turn'' simultaneously, a deadlock occurs. 
+\end{itemize} 
+
+\textbf{Canonical solution: Peterson Algorithm }
+\begin{lstlisting}[language=C]
+  /* For core P0 -------------------------------------- */
+  wantCS[0] = true;  // Raise the request to enter CS
+  turn = 1;          // Let the other core go first 
+  while ( wantCS[1] && turn == 1 ) NO_OP();  
+  {CS} 
+  wantCS[0] = false; 
+  
+  /* For core P1 -------------------------------------- */
+  wantCS[1] = true;  // Raise the request to enter CS
+  turn = 0;          // Let the other core go first 
+  while ( wantCS[0] && turn == 0 ) NO_OP();  
+  {CS} 
+  wantCS[1] = false; 
+\end{lstlisting} 
+
+\textbf{Proof: }
+
+\begin{enumerate}
+\item Deadlock-free 
+
+Deadlock \\ 
+$\Rightarrow$ ( wantCS[1] \&\& turn == 1 ) \&\& ( wantCS[0] \&\& turn == 0 ) \\
+But turn cannot be 1 and 0 at the same time $\Rightarrow$ conflict 
+
+\item Mutual exclusion 
+
+Assume both are in CS, and let the value of turn be 1.  \\ 
+Then at some point before this, turn = 0. \\ 
+Then at some point further before, wantCS[1] = true happens. \\
+Now we have ( wantCS[1] \&\& turn == 1 ) $\Rightarrow$ P0 cannot enter CS. \\
+\\
+\textit{This informal proof does not seem to be correct. The formal proof
+(Dijkstra's proof) should be
+in the course material, and can be found on the Internet.  }
+\end{enumerate}
+
+\bibliographystyle{abbrv}
+\bibliography{simple}
+
+\end{document}
