@@ -28,46 +28,33 @@ public class RLockInc implements Runnable {
         int m = 1200000; 
         int n = Integer.parseInt(args[0]); 
 
-        RLockInc t1 = new RLockInc(m, n); 
-        RLockInc t2 = new RLockInc(m, n); 
-        RLockInc t3 = new RLockInc(m, n); 
-        RLockInc t4 = new RLockInc(m, n); 
-        RLockInc t5 = new RLockInc(m, n); 
-        RLockInc t6 = new RLockInc(m, n); 
-        RLockInc t7 = new RLockInc(m, n); 
-        RLockInc t8 = new RLockInc(m, n); 
+        RLockInc [] f_array; 
+        Thread [] t_array; 
+
+        f_array = new RLockInc[n]; 
+        t_array = new Thread[n]; 
+
+        for (int i = 0; i < n; i++ ) { 
+            f_array[i] = new RLockInc(m, n); 
+            t_array[i] = new Thread(f_array[i]); 
+        }
 
         long startTime = System.currentTimeMillis(); 
 
-        if (n >= 1) { 
-            t1.run(); 
-        }
-        if (n >= 2) { 
-            t2.run(); 
-        }
-        if (n >= 3) { 
-            t3.run(); 
-        }
-        if (n >= 4) { 
-            t4.run(); 
-        }
-        if (n >= 5) { 
-            t5.run(); 
-        }
-        if (n >= 6) { 
-            t6.run(); 
-        }
-        if (n >= 7) { 
-            t7.run(); 
-        }
-        if (n >= 8) { 
-            t8.run(); 
+        for (int i = 0; i < n; i++ ) { 
+            t_array[i].start(); 
         }
 
-        if (t1.complete && t2.complete && t3.complete && t4.complete && 
-            t5.complete && t6.complete && t7.complete && t8.complete    ) {
-            long endTime = System.currentTimeMillis(); 
-            System.out.println("Execution time: " + (endTime - startTime) + " ms"); 
+        boolean someone_alive = true; 
+        while (someone_alive ) {
+            someone_alive = false; 
+            for (int i = 0; i < n; i++ ) { 
+                if (t_array[i].getState() != Thread.State.TERMINATED) 
+                    someone_alive = true; 
+            }
         }
+
+        long endTime = System.currentTimeMillis(); 
+        System.out.println("Execution time: " + (endTime - startTime) + " ms"); 
     }
 }

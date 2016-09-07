@@ -50,6 +50,7 @@ public class PTournamentLock {
     public void lock() {
         int i = ++pid; 
         int k = last.length - (i + 1)/2; 
+
         while ( k > 0 ) {
             gate[i] = k; 
             last[k] = i; 
@@ -59,21 +60,29 @@ public class PTournamentLock {
             while ( someone_ahead && last[k] == i ) {
                 someone_ahead = false;
                 for ( int j = 1; j < n + 1; j++ ) {
-                    int check_gate = k;  
+
+                    /* The smallest gate number in the current level */
+                    int check_gate = (int) Math.pow(2.0, Math.floor(Math.log10(k)/Math.log10(2.0)));  
+
+                    /*
                     while ( check_gate > 1 ) {
                         check_gate = check_gate/2; 
                         if ( j != i && gate[j] == check_gate )  {
                             someone_ahead = true;
                             break; 
                         }
-
                     }
-                }
-            }
+                    */
+                    if ( j != i && gate[j] < check_gate )  {
+                        someone_ahead = true;
+                        break; 
+                    } // if ( j != i && gate[j] < check_gate )
+                } // for ( int j = 1; j < n + 1; j++ )
+            } // while ( someone_ahead && last[k] == i )
 
             k = k/2; 
-        }
-    }
+        } // while ( k > 0 )
+    } // public void lock()
 
     public void unlock() {
         gate[pid] = 0; 

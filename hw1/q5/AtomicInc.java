@@ -2,8 +2,7 @@ import java.lang.* ;
 import java.util.concurrent.atomic.* ; 
 
 public class AtomicInc implements Runnable { 
-    public boolean complete = true; 
-    public static AtomicInteger c = new AtomicInteger(); 
+    public static volatile AtomicInteger c = new AtomicInteger(); 
     public static int expect = 0; 
     public int m; 
     public int n; 
@@ -12,57 +11,43 @@ public class AtomicInc implements Runnable {
         n = n_val; 
     }
     public void run() { 
-        complete = false; 
         for ( int i = 0; i < Math.ceil(m/(double)n); i++ ) {
             c.compareAndSet(expect, expect + 1); 
             expect++; 
         }
         System.out.println("Current counter value: " + c.get()); 
-        complete = true; 
     }
     public static void main(String[] args) { 
         int m = 1200000; 
         int n = Integer.parseInt(args[0]); 
 
-        AtomicInc t1 = new AtomicInc(m, n); 
-        AtomicInc t2 = new AtomicInc(m, n); 
-        AtomicInc t3 = new AtomicInc(m, n); 
-        AtomicInc t4 = new AtomicInc(m, n); 
-        AtomicInc t5 = new AtomicInc(m, n); 
-        AtomicInc t6 = new AtomicInc(m, n); 
-        AtomicInc t7 = new AtomicInc(m, n); 
-        AtomicInc t8 = new AtomicInc(m, n); 
+        AtomicInc [] f_array; 
+        Thread [] t_array; 
+
+        f_array = new AtomicInc[n]; 
+        t_array = new Thread[n]; 
+
+        for (int i = 0; i < n; i++ ) { 
+            f_array[i] = new AtomicInc(m, n); 
+            t_array[i] = new Thread(f_array[i]); 
+        }
 
         long startTime = System.currentTimeMillis(); 
 
-        if (n >= 1) { 
-            t1.run(); 
+        for (int i = 0; i < n; i++ ) { 
+            t_array[i].start(); 
         }
-        if (n >= 2) { 
-            t2.run(); 
+
+        boolean someone_alive = true; 
+        while (someone_alive ) {
+            someone_alive = false; 
+            for (int i = 0; i < n; i++ ) { 
+                if (t_array[i].getState() != Thread.State.TERMINATED) 
+                    someone_alive = true; 
+            }
         }
-        if (n >= 3) { 
-            t3.run(); 
-        }
-        if (n >= 4) { 
-            t4.run(); 
-        }
-        if (n >= 5) { 
-            t5.run(); 
-        }
-        if (n >= 6) { 
-            t6.run(); 
-        }
-        if (n >= 7) { 
-            t7.run(); 
-        }
-        if (n >= 8) { 
-            t8.run(); 
-        }
-        if (t1.complete && t2.complete && t3.complete && t4.complete && 
-            t5.complete && t6.complete && t7.complete && t8.complete    ) {
-            long endTime = System.currentTimeMillis(); 
-            System.out.println("Execution time: " + (endTime - startTime) + " ms"); 
-        }
+
+        long endTime = System.currentTimeMillis(); 
+        System.out.println("Execution time: " + (endTime - startTime) + " ms"); 
     }
 }

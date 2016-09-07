@@ -21,47 +21,33 @@ public class SyncInc implements Runnable {
         int m = 1200000; 
         int n = Integer.parseInt(args[0]); 
 
-        SyncInc t1 = new SyncInc(m, n); 
-        SyncInc t2 = new SyncInc(m, n); 
-        SyncInc t3 = new SyncInc(m, n); 
-        SyncInc t4 = new SyncInc(m, n); 
-        SyncInc t5 = new SyncInc(m, n); 
-        SyncInc t6 = new SyncInc(m, n); 
-        SyncInc t7 = new SyncInc(m, n); 
-        SyncInc t8 = new SyncInc(m, n); 
+        SyncInc [] f_array; 
+        Thread [] t_array; 
+
+        f_array = new SyncInc[n]; 
+        t_array = new Thread[n]; 
+
+        for (int i = 0; i < n; i++ ) { 
+            f_array[i] = new SyncInc(m, n); 
+            t_array[i] = new Thread(f_array[i]); 
+        }
 
         long startTime = System.currentTimeMillis(); 
 
-        if (n >= 1) { 
-            t1.run(); 
-        }
-        if (n >= 2) { 
-            t2.run(); 
-        }
-        if (n >= 3) { 
-            t3.run(); 
-        }
-        if (n >= 4) { 
-            t4.run(); 
-        }
-        if (n >= 5) { 
-            t5.run(); 
-        }
-        if (n >= 6) { 
-            t6.run(); 
-        }
-        if (n >= 7) { 
-            t7.run(); 
-        }
-        if (n >= 8) { 
-            t8.run(); 
+        for (int i = 0; i < n; i++ ) { 
+            t_array[i].start(); 
         }
 
-        if (t1.complete && t2.complete && t3.complete && t4.complete && 
-            t5.complete && t6.complete && t7.complete && t8.complete    ) {
-            long endTime = System.currentTimeMillis(); 
-            System.out.println("Execution time: " + (endTime - startTime) + " ms"); 
+        boolean someone_alive = true; 
+        while (someone_alive ) {
+            someone_alive = false; 
+            for (int i = 0; i < n; i++ ) { 
+                if (t_array[i].getState() != Thread.State.TERMINATED) 
+                    someone_alive = true; 
+            }
         }
+
+        long endTime = System.currentTimeMillis(); 
+        System.out.println("Execution time: " + (endTime - startTime) + " ms"); 
     }
-
 }
