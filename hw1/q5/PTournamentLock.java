@@ -1,8 +1,10 @@
 import java.lang.* ; 
+import java.util.concurrent.locks.* ; 
+import java.util.concurrent.atomic.* ; 
 
-public class PTournamentLock { 
+public class PTournamentLock extends ReentrantLock { 
     /* Static counter counting PIDs */
-    private static int pid = 0; 
+    // private static volatile AtomicInteger pid = new AtomicInteger(); 
 
     /* Number of threads */
     private int n; 
@@ -27,64 +29,55 @@ public class PTournamentLock {
          return l == Math.floor(l) ? m - 1: m; 
     }
 
-    /* Get the level of a certain gate */ 
-    /* 
-    private int getLevel(int gate) { 
-        return Math.log10(gate) / Math.log10(2.0) + 1; 
-    }
-    */
-
     /* CTOR */
     public PTournamentLock(int n_val) {
         n = n_val; 
         gate  = new int[n + 1]; 
         last  = new int[getNumGate() + 1]; 
-        /*
-        System.out.println("Number of gates: " + getNumGate()); 
-        */
     }
 
     /* The i-th thread */
     /* i = 1: n */
     /* k = 1: gate.length */
-    public void lock() {
-        int i = ++pid; 
-        int k = last.length - (i + 1)/2; 
+    public void lock(int pid) {
+      // pid.getAndAdd(1); 
+      // int i = pid.get(); 
+      int i = pid + 1; 
+      // System.out.println("Thread " + i + " is now requesting CS. "); 
+      int k = last.length - (i + 1)/2; 
 
-        while ( k > 0 ) {
-            gate[i] = k; 
-            last[k] = i; 
+      while ( k > 0 ) {
+        gate[i] = k; 
+        last[k] = i; 
+        // System.out.println("Thread " + i + " is now at gate " + k + " . "); 
 
-            /* Check if there is anyone ahead in the thread's path */
-            boolean someone_ahead = true; 
-            while ( someone_ahead && last[k] == i ) {
-                someone_ahead = false;
-                for ( int j = 1; j < n + 1; j++ ) {
+        /* Check if there is anyone ahead in the thread's path */
+        boolean someone_ahead = true; 
 
-                    /* The smallest gate number in the current level */
-                    int check_gate = (int) Math.pow(2.0, Math.floor(Math.log10(k)/Math.log10(2.0)));  
+        /* The smallest gate number in the current level */
+        int check_gate = (int) Math.pow(2.0, Math.floor(Math.log10(k)/Math.log10(2.0)));  
+        // System.out.println("Thread " + i + " is now checking gate " + check_gate + " . "); 
 
-                    /*
-                    while ( check_gate > 1 ) {
-                        check_gate = check_gate/2; 
-                        if ( j != i && gate[j] == check_gate )  {
-                            someone_ahead = true;
-                            break; 
-                        }
-                    }
-                    */
-                    if ( j != i && gate[j] < check_gate )  {
-                        someone_ahead = true;
-                        break; 
-                    } // if ( j != i && gate[j] < check_gate )
-                } // for ( int j = 1; j < n + 1; j++ )
-            } // while ( someone_ahead && last[k] == i )
+        while ( someone_ahead && last[k] == i ) {
+          someone_ahead = false;
 
-            k = k/2; 
-        } // while ( k > 0 )
+          for ( int j = 1; j < n + 1; j++ ) {
+            if ( j != i && (gate[j] < check_gate || gate[j] == k) && gate[j] != 0 )  {
+                someone_ahead = true;
+                break; 
+            } // if ( j != i && gate[j] < check_gate )
+          } // for ( int j = 1; j < n + 1; j++ )
+        } // while ( someone_ahead && last[k] == i )
+
+        k = k/2; 
+      } // while ( k > 0 )
+
+      // System.out.println("Thread " + i + " is now entering CS. "); 
     } // public void lock()
 
-    public void unlock() {
-        gate[pid] = 0; 
+    public void unlock(int pid) {
+        int i = pid + 1;
+        gate[i] = 0; 
+        // System.out.println("Thread " + i + " is now leaving CS. "); 
     }
 }

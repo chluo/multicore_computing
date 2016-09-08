@@ -2,24 +2,25 @@ import java.lang.* ;
 import java.util.concurrent.locks.ReentrantLock; 
 
 public class PTournamentInc implements Runnable { 
-    public boolean complete = true; 
     public static volatile int c = 0; 
+    public int pid; 
     public int m; 
     public int n; 
     private static PTournamentLock lock; 
-    public PTournamentInc(int m_val, int n_val) { 
+    public PTournamentInc(int m_val, int n_val, int pid_val) { 
         m = m_val; 
         n = n_val; 
+        pid = pid_val; 
         lock = new PTournamentLock(n); 
     }
     public void run() { 
-        lock.lock(); 
-        try { 
-            for ( int i = 0; i < Math.ceil(m/(double)n); i++ ) {
-                c++; 
-            }
-        } finally { 
-            lock.unlock(); 
+        lock.lock(pid); 
+        try {
+          for ( int i = 0; i < Math.ceil(m/(double)n); i++ ) {
+              c++; 
+          }
+        } finally {
+          lock.unlock(pid); 
         }
         System.out.println("Current counter value: " + c); 
     }
@@ -34,7 +35,7 @@ public class PTournamentInc implements Runnable {
         t_array = new Thread[n]; 
 
         for (int i = 0; i < n; i++ ) { 
-            f_array[i] = new PTournamentInc(m, n); 
+            f_array[i] = new PTournamentInc(m, n, i); 
             t_array[i] = new Thread(f_array[i]); 
         }
 

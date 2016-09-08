@@ -3,7 +3,9 @@ import java.util.concurrent.atomic.* ;
 
 public class AtomicInc implements Runnable { 
     public static volatile AtomicInteger c = new AtomicInteger(); 
+    /*
     public static int expect = 0; 
+    */
     public int m; 
     public int n; 
     public AtomicInc(int m_val, int n_val) { 
@@ -11,11 +13,17 @@ public class AtomicInc implements Runnable {
         n = n_val; 
     }
     public void run() { 
-        for ( int i = 0; i < Math.ceil(m/(double)n); i++ ) {
-            c.compareAndSet(expect, expect + 1); 
-            expect++; 
+        try {
+          for ( int i = 0; i < Math.ceil(m/(double)n); i++ ) {
+              c.getAndAdd(1); 
+              /*
+              c.compareAndSet(expect, expect + 1); 
+              expect++; 
+              */
+          }
+        } finally {
+          System.out.println("Current counter value: " + c.get()); 
         }
-        System.out.println("Current counter value: " + c.get()); 
     }
     public static void main(String[] args) { 
         int m = 1200000; 

@@ -3,222 +3,222 @@
 #-------------------------------------------------
 ## Number of threads: 1
 Current counter value: 1200000
-Execution time: 18 ms
+Execution time: 32 ms
 ## Number of threads: 2
-Current counter value: 600000
+Current counter value: 601024
 Current counter value: 1200000
-Execution time: 21 ms
+Execution time: 38 ms
 ## Number of threads: 3
-Current counter value: 400000
-Current counter value: 800000
+Current counter value: 401024
+Current counter value: 800179
 Current counter value: 1200000
-Execution time: 24 ms
+Execution time: 49 ms
 ## Number of threads: 4
-Current counter value: 300000
+Current counter value: 300360
 Current counter value: 600000
-Current counter value: 900000
+Current counter value: 900070
 Current counter value: 1200000
-Execution time: 21 ms
+Execution time: 69 ms
 ## Number of threads: 5
-Current counter value: 240000
-Current counter value: 480000
-Current counter value: 720000
-Current counter value: 960000
+Current counter value: 240239
+Current counter value: 480117
+Current counter value: 720294
+Current counter value: 966144
 Current counter value: 1200000
-Execution time: 26 ms
+Execution time: 65 ms
 ## Number of threads: 6
-Current counter value: 200000
+Current counter value: 200885
 Current counter value: 400000
-Current counter value: 600000
-Current counter value: 800000
+Current counter value: 600630
+Current counter value: 809298
 Current counter value: 1000000
 Current counter value: 1200000
-Execution time: 25 ms
+Execution time: 73 ms
 ## Number of threads: 7
 Current counter value: 171429
-Current counter value: 342858
-Current counter value: 514287
-Current counter value: 685716
-Current counter value: 857145
+Current counter value: 342896
+Current counter value: 514309
+Current counter value: 686110
+Current counter value: 857240
 Current counter value: 1028574
 Current counter value: 1200003
-Execution time: 36 ms
+Execution time: 60 ms
 ## Number of threads: 8
-Current counter value: 150000
+Current counter value: 150382
 Current counter value: 300000
 Current counter value: 450000
-Current counter value: 600000
-Current counter value: 750000
-Current counter value: 900000
+Current counter value: 606471
+Current counter value: 750225
+Current counter value: 900067
 Current counter value: 1050000
 Current counter value: 1200000
-Execution time: 36 ms
+Execution time: 45 ms
 
 #-------------------------------------------------
 #> Using Java's AtomicInteger
 #-------------------------------------------------
 ## Number of threads: 1
 Current counter value: 1200000
-Execution time: 25 ms
+Execution time: 36 ms
 ## Number of threads: 2
-Current counter value: 600000
+Current counter value: 1195044
 Current counter value: 1200000
-Execution time: 23 ms
+Execution time: 54 ms
 ## Number of threads: 3
-Current counter value: 400000
-Current counter value: 800000
+Current counter value: 1017507
+Current counter value: 1174600
 Current counter value: 1200000
-Execution time: 24 ms
+Execution time: 40 ms
 ## Number of threads: 4
-Current counter value: 300000
-Current counter value: 600000
-Current counter value: 900000
+Current counter value: 763559
+Current counter value: 856734
+Current counter value: 1174953
 Current counter value: 1200000
-Execution time: 24 ms
+Execution time: 32 ms
 ## Number of threads: 5
-Current counter value: 240000
-Current counter value: 480000
-Current counter value: 720000
-Current counter value: 960000
+Current counter value: 525473
+Current counter value: 823513
+Current counter value: 1122770
 Current counter value: 1200000
-Execution time: 24 ms
+Current counter value: 1200000
+Execution time: 47 ms
 ## Number of threads: 6
-Current counter value: 200000
-Current counter value: 400000
-Current counter value: 600000
-Current counter value: 800000
-Current counter value: 1000000
+Current counter value: 734679
+Current counter value: 748975
+Current counter value: 1060420
+Current counter value: 1065125
+Current counter value: 1104677
 Current counter value: 1200000
-Execution time: 26 ms
+Execution time: 44 ms
 ## Number of threads: 7
-Current counter value: 171429
-Current counter value: 342858
-Current counter value: 514287
-Current counter value: 685716
-Current counter value: 857145
-Current counter value: 1028574
+Current counter value: 398289
+Current counter value: 516595
+Current counter value: 642890
+Current counter value: 921211
+Current counter value: 953202
+Current counter value: 1111106
 Current counter value: 1200003
-Execution time: 27 ms
+Execution time: 52 ms
 ## Number of threads: 8
-Current counter value: 150000
-Current counter value: 300000
-Current counter value: 450000
-Current counter value: 600000
-Current counter value: 750000
-Current counter value: 900000
-Current counter value: 1050000
+Current counter value: 542217
+Current counter value: 804318
+Current counter value: 829457
+Current counter value: 850346
+Current counter value: 1042812
+Current counter value: 1073977
+Current counter value: 1092918
 Current counter value: 1200000
-Execution time: 22 ms
+Execution time: 63 ms
 
 #-------------------------------------------------
 #> Using Java's synchronized construct
 #-------------------------------------------------
 ## Number of threads: 1
 Current counter value: 1200000
-Execution time: 40 ms
+Execution time: 50 ms
 ## Number of threads: 2
-Current counter value: 600000
+Current counter value: 1042202
 Current counter value: 1200000
-Execution time: 43 ms
+Execution time: 72 ms
 ## Number of threads: 3
-Current counter value: 400000
-Current counter value: 800000
+Current counter value: 845354
+Current counter value: 862490
 Current counter value: 1200000
-Execution time: 46 ms
+Execution time: 74 ms
 ## Number of threads: 4
-Current counter value: 300000
-Current counter value: 600000
-Current counter value: 900000
+Current counter value: 628132
+Current counter value: 932512
+Current counter value: 959907
 Current counter value: 1200000
-Execution time: 46 ms
+Execution time: 90 ms
 ## Number of threads: 5
-Current counter value: 240000
-Current counter value: 480000
-Current counter value: 720000
-Current counter value: 960000
+Current counter value: 666915
+Current counter value: 797307
+Current counter value: 873731
+Current counter value: 1198533
 Current counter value: 1200000
-Execution time: 46 ms
+Execution time: 65 ms
 ## Number of threads: 6
-Current counter value: 200000
-Current counter value: 400000
-Current counter value: 600000
-Current counter value: 800000
-Current counter value: 1000000
+Current counter value: 563148
+Current counter value: 729257
+Current counter value: 854762
+Current counter value: 955379
+Current counter value: 1156457
 Current counter value: 1200000
-Execution time: 43 ms
+Execution time: 87 ms
 ## Number of threads: 7
-Current counter value: 171429
-Current counter value: 342858
-Current counter value: 514287
-Current counter value: 685716
-Current counter value: 857145
-Current counter value: 1028574
+Current counter value: 360548
+Current counter value: 566037
+Current counter value: 598919
+Current counter value: 923876
+Current counter value: 937434
+Current counter value: 1068061
 Current counter value: 1200003
-Execution time: 44 ms
+Execution time: 95 ms
 ## Number of threads: 8
-Current counter value: 150000
-Current counter value: 300000
-Current counter value: 450000
-Current counter value: 600000
-Current counter value: 750000
-Current counter value: 900000
-Current counter value: 1050000
+Current counter value: 511988
+Current counter value: 672031
+Current counter value: 710319
+Current counter value: 840581
+Current counter value: 853031
+Current counter value: 964561
+Current counter value: 1110298
 Current counter value: 1200000
-Execution time: 43 ms
+Execution time: 101 ms
 
 # --------------------------------------------------
 #> Using Java's ReentrantLock
 # --------------------------------------------------
 ## Number of threads: 1
 Current counter value: 1200000
-Execution time: 18 ms
+Execution time: 28 ms
 ## Number of threads: 2
 Current counter value: 600000
 Current counter value: 1200000
-Execution time: 21 ms
+Execution time: 49 ms
 ## Number of threads: 3
-Current counter value: 400000
-Current counter value: 800000
+Current counter value: 401003
+Current counter value: 800080
 Current counter value: 1200000
-Execution time: 23 ms
+Execution time: 36 ms
 ## Number of threads: 4
-Current counter value: 300000
+Current counter value: 300987
 Current counter value: 600000
-Current counter value: 900000
 Current counter value: 1200000
-Execution time: 21 ms
+Current counter value: 1200000
+Execution time: 30 ms
 ## Number of threads: 5
-Current counter value: 240000
+Current counter value: 240907
 Current counter value: 480000
-Current counter value: 720000
-Current counter value: 960000
+Current counter value: 720010
+Current counter value: 968304
 Current counter value: 1200000
-Execution time: 22 ms
+Execution time: 31 ms
 ## Number of threads: 6
-Current counter value: 200000
-Current counter value: 400000
-Current counter value: 600000
-Current counter value: 800000
+Current counter value: 202200
+Current counter value: 600085
+Current counter value: 608454
+Current counter value: 810493
 Current counter value: 1000000
 Current counter value: 1200000
-Execution time: 21 ms
+Execution time: 27 ms
 ## Number of threads: 7
-Current counter value: 171429
-Current counter value: 342858
-Current counter value: 514287
-Current counter value: 685716
-Current counter value: 857145
+Current counter value: 343882
+Current counter value: 359878
+Current counter value: 514309
+Current counter value: 797885
+Current counter value: 857221
 Current counter value: 1028574
 Current counter value: 1200003
-Execution time: 23 ms
+Execution time: 32 ms
 ## Number of threads: 8
-Current counter value: 150000
+Current counter value: 151314
 Current counter value: 300000
 Current counter value: 450000
-Current counter value: 600000
+Current counter value: 611510
 Current counter value: 750000
 Current counter value: 900000
 Current counter value: 1050000
 Current counter value: 1200000
-Execution time: 28 ms
+Execution time: 29 ms
 
