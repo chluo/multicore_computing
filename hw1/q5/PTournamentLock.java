@@ -1,10 +1,8 @@
 import java.lang.* ; 
 import java.util.concurrent.locks.* ; 
-import java.util.concurrent.atomic.* ; 
+import java.util.concurrent.atomic.AtomicInteger ; 
 
 public class PTournamentLock extends ReentrantLock { 
-    /* Static counter counting PIDs */
-    // private static volatile AtomicInteger pid = new AtomicInteger(); 
 
     /* Number of threads */
     private int n; 
@@ -13,7 +11,7 @@ public class PTournamentLock extends ReentrantLock {
     /* Gates and levels are numbered from root to leafs */
     private int [] gate; 
     /* The stuck thread at each gate: last[gate#] */
-    private volatile int [] last; 
+    private AtomicInteger [] last; 
 
     /* Get the total number of gates */
     private int getNumGate() {
@@ -33,22 +31,19 @@ public class PTournamentLock extends ReentrantLock {
     public PTournamentLock(int n_val) {
         n = n_val; 
         gate  = new int[n + 1]; 
-        last  = new int[getNumGate() + 1]; 
+        last  = new AtomicInteger[getNumGate() + 1]; 
     }
 
     /* The i-th thread */
     /* i = 1: n */
     /* k = 1: gate.length */
     public void lock(int pid) {
-      // pid.getAndAdd(1); 
-      // int i = pid.get(); 
       int i = pid + 1; 
-      // System.out.println("Thread " + i + " is now requesting CS. "); 
       int k = last.length - (i + 1)/2; 
 
       while ( k > 0 ) {
         gate[i] = k; 
-        last[k] = i; 
+        last[k] = new AtomicInteger(i); 
         // System.out.println("Thread " + i + " is now at gate " + k + " . "); 
 
         /* Check if there is anyone ahead in the thread's path */
@@ -58,7 +53,7 @@ public class PTournamentLock extends ReentrantLock {
         int check_gate = (int) Math.pow(2.0, Math.floor(Math.log10(k)/Math.log10(2.0)));  
         // System.out.println("Thread " + i + " is now checking gate " + check_gate + " . "); 
 
-        while ( someone_ahead && last[k] == i ) {
+        while ( someone_ahead && last[k].get() == i ) {
           someone_ahead = false;
 
           for ( int j = 1; j < n + 1; j++ ) {
