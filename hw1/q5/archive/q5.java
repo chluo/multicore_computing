@@ -19,16 +19,19 @@ public class q5 {
   
       /* Get the total number of gates */
       private int getNumGate() {
-          /* 
-           * For power-of-2 number of threads, 
-           * the number of gates is simply (n - 1). 
-           * For other number of threads, 
-           * increase the number to the nearest even number m, 
-           * and then the number of gates m. 
-           */
-           int    m = (n % 2 != 0)? n + 1 : n; 
-           double l = Math.log10((double)m) / Math.log10(2.0);
-           return l == Math.floor(l) ? m - 1: m; 
+        /* 
+         * For power-of-2 number of threads, 
+         * the number of gates is simply (n - 1). 
+         * For other number of threads, 
+         * increase the number to the nearest even number m, 
+         * and then the number of gates m. 
+         */
+
+         // int    m = (n % 2 != 0)? n + 1 : n; 
+         // double l = Math.log10((double)m) / Math.log10(2.0);
+         // return l == Math.floor(l) ? m - 1: m; 
+
+         return n - 1; // Only consider 1, 2, 4 or 8 threads
       }
   
       /* CTOR */
@@ -50,23 +53,14 @@ public class q5 {
           last[k] = new AtomicInteger(i); 
           // System.out.println("Thread " + i + " is now at gate " + k + " . "); 
   
-          /* Check if there is anyone ahead in the thread's path */
-          boolean someone_ahead = true; 
-  
           /* The smallest gate number in the current level */
-          int check_gate = (int) Math.pow(2.0, Math.floor(Math.log10(k)/Math.log10(2.0)));  
+          // Only consider 1, 2, 4 or 8 threads
+          int check_gate = (k + 1)/2; 
           // System.out.println("Thread " + i + " is now checking gate " + check_gate + " . "); 
   
-          while ( someone_ahead && last[k].get() == i ) {
-            someone_ahead = false;
-  
-            for ( int j = 1; j < n + 1; j++ ) {
-              if ( j != i && (gate[j] < check_gate || gate[j] == k) && gate[j] != 0 )  {
-                  someone_ahead = true;
-                  break; 
-              } // if ( j != i && gate[j] < check_gate )
-            } // for ( int j = 1; j < n + 1; j++ )
-          } // while ( someone_ahead && last[k] == i )
+          for ( int j = 1; j < n + 1; j++ ) {
+            while ( j != i && last[k].get() == i && (gate[j] < check_gate || gate[j] == k) && gate[j] != 0 );   
+          } // for ( int j = 1; j < n + 1; j++ )
   
           k = k/2; 
         } // while ( k > 0 )
@@ -118,9 +112,8 @@ public class q5 {
             lock.unlock(pid); 
           }
       }
-      public static void main_a(int n_thread) { 
+      public static void main_a(int n) { 
           int m = 1200000; 
-          int n = n_thread; 
   
           PTournamentInc [] f_array; 
           Thread [] t_array; 
@@ -146,16 +139,13 @@ public class q5 {
           }
   
           long endTime = System.currentTimeMillis(); 
-          System.out.println("With " + n + " threads execution time: " + (endTime - startTime) + " ms"); 
+          System.out.println("With " + n + " threads: " + (endTime - startTime) + " ms / final counter value: " + c); 
       }
   }
   
   /* The incrementing counter based on AtomicInteger */ 
   static class AtomicInc implements Runnable { 
       public static volatile AtomicInteger c = new AtomicInteger(); 
-      /*
-      public static int expect = 0; 
-      */
       public int m; 
       public int n; 
       public AtomicInc(int m_val, int n_val) { 
@@ -197,7 +187,7 @@ public class q5 {
           }
   
           long endTime = System.currentTimeMillis(); 
-          System.out.println("With " + n + " threads execution time: " + (endTime - startTime) + " ms"); 
+          System.out.println("With " + n + " threads: " + (endTime - startTime) + " ms / final counter value: " + c); 
       }
   }
 
@@ -246,7 +236,7 @@ public class q5 {
           }
   
           long endTime = System.currentTimeMillis(); 
-          System.out.println("With " + n + " threads execution time: " + (endTime - startTime) + " ms"); 
+          System.out.println("With " + n + " threads: " + (endTime - startTime) + " ms / final counter value: " + c.get()); 
       }
   }
 
@@ -301,7 +291,7 @@ public class q5 {
           }
   
           long endTime = System.currentTimeMillis(); 
-          System.out.println("With " + n + " threads execution time: " + (endTime - startTime) + " ms"); 
+          System.out.println("With " + n + " threads: " + (endTime - startTime) + " ms / final counter value: " + c); 
       }
   }
 
@@ -311,7 +301,8 @@ public class q5 {
     System.out.println( "#> (a) Using Peterson's Tournament Algorithm" );
     System.out.println( "#-------------------------------------------------");
 
-    for ( int i = 1; i < 9; i++ ) {
+    int [] numThreads = new int[]{1, 2, 4, 8}; 
+    for ( int i : numThreads ) {
       PTournamentInc.c = 0; 
       PTournamentInc.main_a(i); 
     }
