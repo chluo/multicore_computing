@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2016.8.30)  11 SEP 2016 13:30
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2016.8.30)  11 SEP 2016 14:16
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -261,13 +261,13 @@ LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <10> not available
 <plot.png, id=16, 700.11563pt x 425.33907pt>
 File: plot.png Graphic file (type png)
  <use plot.png>
-Package pdftex.def Info: plot.png used on input line 86.
+Package pdftex.def Info: plot.png used on input line 89.
 (pdftex.def)             Requested size: 390.0pt x 236.94214pt.
  [3] [4 <./plot.png (PNG copy)>] (./hw1.aux) ) 
 Here is how much of TeX's memory you used:
  3773 strings out of 493029
- 53158 string characters out of 6136234
- 183090 words of memory out of 5000000
+ 53164 string characters out of 6136234
+ 190090 words of memory out of 5000000
  7270 multiletter control sequences out of 15000+600000
  9962 words of font info for 37 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -281,7 +281,7 @@ s/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
 r17.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb>
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/
 share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on hw1.pdf (4 pages, 139438 bytes).
+Output written on hw1.pdf (4 pages, 139730 bytes).
 PDF statistics:
  54 PDF objects out of 1000 (max. 8388607)
  37 compressed objects within 1 object stream

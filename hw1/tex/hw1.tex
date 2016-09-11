@@ -66,9 +66,12 @@ for (k = 1 : N - l) {
   gate[i] = k;          // P_i is at gate k 
   last[k] = i;          // P_i updates last for that gate 
 	
-  for (j = 1 : N - 1) {
-	while (j != i && gate[j] >= k && last[k] == i) 
-	  NO_OP(); 
+  int numAhead = l + 1;   
+  while (numAhead > l && last[k] == i) {
+    for (j = 1 : N - 1) {
+	  if (j != i && gate[j] >= k) 
+	    numAhead += 1; 
+    }
   }
 }
 CS; 

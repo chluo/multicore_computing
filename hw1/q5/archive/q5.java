@@ -33,6 +33,10 @@ public class q5 {
 
          return n - 1; // Only consider 1, 2, 4 or 8 threads
       }
+
+      private double log2(double x) {
+        return Math.log10(x)/Math.log10(2.0); 
+      }
   
       /* CTOR */
       public PTournamentLock(int n_val) {
@@ -54,8 +58,7 @@ public class q5 {
           // System.out.println("Thread " + i + " is now at gate " + k + " . "); 
   
           /* The smallest gate number in the current level */
-          // Only consider 1, 2, 4 or 8 threads
-          int check_gate = (k + 1)/2; 
+          int check_gate = (int) Math.pow(2, Math.floor(log2((double)k))); 
           // System.out.println("Thread " + i + " is now checking gate " + check_gate + " . "); 
   
           for ( int j = 1; j < n + 1; j++ ) {
