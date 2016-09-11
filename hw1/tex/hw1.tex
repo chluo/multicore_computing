@@ -51,6 +51,9 @@ $$S_2 = \dfrac{1}{(1-P) + \dfrac{P}{2}}$$ and $$S_n = \dfrac{1}{(1-P) + \dfrac{P
 Solving the equations, we get $$S_n = \dfrac{nS_2}{(2-n)S_2 + 2(n-1)}$$ 
 
 \section*{Question 2}
+It is a not possible to overtake a thread within a for loop iteration( within a level) since that would imply changing last[k], which immediately release the waiting thread from line 21.  
+
+However, between levels it's very possible for some threads to overtake others an arbitrary number of times. In the situation described below, thread A is overtaken by thread B. Suppose both thread A has completed the first for iteration with i = 1 and is about to enter the next gate with i = 2. Thread B just enters gate 1. If A is now paused by calling sleep()), thread B which has successfully completed level 1 may overtakes A  even if thread B is the later one to enter gate 1 . 
 
 \section*{Question 3} 
 In order make Filter Algorithm able to solve the l-exclusion problem, we can simply reduce the number gates from $N$ to $(N - l)$. \\
