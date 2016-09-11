@@ -1,137 +1,161 @@
 import java.lang.* ; 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.locks.* ; 
 import java.util.concurrent.atomic.* ; 
+import java.util.concurrent.locks.ReentrantLock; 
 
 public class q5 {
+  
+  /* Lock based on Peterson Tournament Algorithm */
+  static class PTournamentLock extends ReentrantLock { 
+  
+      /* Number of threads */
+      private int n; 
+  
+      /* The gate number each thread is at: gate[thread#] */
+      /* Gates and levels are numbered from root to leafs */
+      private int [] gate; 
+      /* The stuck thread at each gate: last[gate#] */
+      private AtomicInteger [] last; 
+  
+      /* Get the total number of gates */
+      private int getNumGate() {
+          /* 
+           * For power-of-2 number of threads, 
+           * the number of gates is simply (n - 1). 
+           * For other number of threads, 
+           * increase the number to the nearest even number m, 
+           * and then the number of gates m. 
+           */
+           int    m = (n % 2 != 0)? n + 1 : n; 
+           double l = Math.log10((double)m) / Math.log10(2.0);
+           return l == Math.floor(l) ? m - 1: m; 
+      }
+  
+      /* CTOR */
+      public PTournamentLock(int n_val) {
+          n = n_val; 
+          gate  = new int[n + 1]; 
+          last  = new AtomicInteger[getNumGate() + 1]; 
+      }
+  
+      /* The i-th thread */
+      /* i = 1: n */
+      /* k = 1: gate.length */
+      public void lock(int pid) {
+        int i = pid + 1; 
+        int k = last.length - (i + 1)/2; 
+  
+        while ( k > 0 ) {
+          gate[i] = k; 
+          last[k] = new AtomicInteger(i); 
+          // System.out.println("Thread " + i + " is now at gate " + k + " . "); 
+  
+          /* Check if there is anyone ahead in the thread's path */
+          boolean someone_ahead = true; 
+  
+          /* The smallest gate number in the current level */
+          int check_gate = (int) Math.pow(2.0, Math.floor(Math.log10(k)/Math.log10(2.0)));  
+          // System.out.println("Thread " + i + " is now checking gate " + check_gate + " . "); 
+  
+          while ( someone_ahead && last[k].get() == i ) {
+            someone_ahead = false;
+  
+            for ( int j = 1; j < n + 1; j++ ) {
+              if ( j != i && (gate[j] < check_gate || gate[j] == k) && gate[j] != 0 )  {
+                  someone_ahead = true;
+                  break; 
+              } // if ( j != i && gate[j] < check_gate )
+            } // for ( int j = 1; j < n + 1; j++ )
+          } // while ( someone_ahead && last[k] == i )
+  
+          k = k/2; 
+        } // while ( k > 0 )
+  
+        // System.out.println("Thread " + i + " is now entering CS. "); 
+      } // public void lock()
+  
+      public void unlock(int pid) {
+          int i = pid + 1;
+          gate[i] = 0; 
+          // System.out.println("Thread " + i + " is now leaving CS. "); 
+      }
+  }
 
-  /* The incrementing counter based on Peterson's Algorithm */
-  static class Tournament {
-  
-      int numThreads;
-      PertersonAlgorithm[] entryGates;
-      public static int defaultSum = 1200000;
-  
-      public Tournament(int numThreads){
-          this.numThreads = numThreads;
-          entryGates = new PertersonAlgorithm[numThreads/2];
-          for(int i = 0; i < numThreads/2; i++){
-              entryGates[i] = new PertersonAlgorithm(i);
-          }
-          buildTournament(entryGates);
-  
+  /* Syncrhonized counter */
+  static class SyncCnt {
+      private int cnt = 0; 
+      public synchronized void inc() {
+          cnt++; 
       }
-  
-      public void buildTournament(PertersonAlgorithm[] entryGates){
-          if(entryGates.length==0) return;
-          int num = entryGates.length/2;
-          if(num==0) {
-              entryGates[0].nextGate = null;
-              return;
-          }
-          PertersonAlgorithm[] nextGates = new PertersonAlgorithm[num];
-          for(int i = 0; i < num; i++){
-              nextGates[i] = new PertersonAlgorithm(i);
-              entryGates[i*2].nextGate = nextGates[i];
-              entryGates[i*2+1].nextGate = nextGates[i];
-          }
-          buildTournament(nextGates);
+      public synchronized void dec() {
+          cnt--; 
       }
-  
-      public LinkedList<PertersonAlgorithm> requestCS(int pid){
-          LinkedList<PertersonAlgorithm> path= new LinkedList<>();
-          if(entryGates.length==0) return path;
-          PertersonAlgorithm entryGate = entryGates[pid/2];
-          entryGate.lock(pid%2);
-          entryGate.lockedNum = pid%2;
-          path.add(entryGate);
-          while(entryGate.nextGate!=null){
-              pid = entryGate.standard%2;
-              entryGate = entryGate.nextGate;
-              entryGate.lock(pid);
-              entryGate.lockedNum = pid;
-              path.add(entryGate);
-          }
-          // reach the last gate and then enter into CS
-          return path;
+      public int get() { 
+          return cnt; 
       }
-  
-      public void releaseCS(LinkedList<PertersonAlgorithm> path){
-          if(path.isEmpty()) return;
-          while (!path.isEmpty()) {
-              PertersonAlgorithm gate = path.removeLast();
-              gate.unlock(gate.lockedNum);
+      public void rst() { 
+          cnt = 0; 
+      }
+  }
+
+  /* The incrementing counter implementation based on Tournament Algorithm */
+  static class PTournamentInc implements Runnable { 
+      public static volatile int c = 0; 
+      public int pid; 
+      public int m; 
+      public int n; 
+      private static PTournamentLock lock; 
+      public PTournamentInc(int m_val, int n_val, int pid_val) { 
+          m = m_val; 
+          n = n_val; 
+          pid = pid_val; 
+          lock = new PTournamentLock(n); 
+      }
+      public void run() { 
+          for ( int i = 0; i < Math.ceil(m/(double)n); i++ ) {
+            lock.lock(pid); 
+            c++; 
+            lock.unlock(pid); 
           }
       }
+      public static void main_a(int n_thread) { 
+          int m = 1200000; 
+          int n = n_thread; 
   
-      static class PertersonAlgorithm {
-          PertersonAlgorithm nextGate;
-          int lockedNum;
-          int standard;
-          volatile boolean wantCS[] = {false, false};
-          volatile  int turn = 1;
-          public PertersonAlgorithm(int i){
-              standard = i;
-          }
-          public void lock(int i) {
-              int j = 1 - i;
-              wantCS[i] = true;
-              turn = j;
-              while (wantCS[j] && (turn == j)) ;
-          }
-          public void unlock(int i) {
-              wantCS[i] = false;
-          }
-      }
+          PTournamentInc [] f_array; 
+          Thread [] t_array; 
   
-      static class Incrementer implements Runnable{
-          public static volatile int c = 0;
-          public int pid;
-          public static Tournament tournamentLock;
-          int target;
+          f_array = new PTournamentInc[n]; 
+          t_array = new Thread[n]; 
   
-          public Incrementer(int pid, int numThreads){
-              this.pid = pid;
-              tournamentLock = new Tournament(numThreads);
-              target = (int)Math.ceil(defaultSum/numThreads);
+          for (int i = 0; i < n; i++ ) { 
+              f_array[i] = new PTournamentInc(m, n, i); 
+              t_array[i] = new Thread(f_array[i]); 
           }
   
-          public void run(){
-              for(int i = 0; i < target; i++) {
-                  LinkedList<PertersonAlgorithm> path = tournamentLock.requestCS(pid);
-                  c++;
-                  tournamentLock.releaseCS(path);
-              }
+          long startTime = System.currentTimeMillis(); 
+  
+          for (int i = 0; i < n; i++ ) { 
+            t_array[i].start(); 
           }
-      }
+
+          for (int i = 0; i < n; i++ ) { 
+            try {
+              t_array[i].join(); 
+            } catch (InterruptedException e) {} 
+          }
   
-      public static void main_a(int numThread) {
-  
-              Thread[] threads = new Thread[numThread];
-              for(int j = 0; j < numThread; j++){
-                  threads[j] = new Thread(new Incrementer(j,numThread));
-              }
-              long startTime = System.currentTimeMillis();
-              for(int j = 0; j< numThread; j++){
-                  threads[j].start();
-              }
-              for (int j = 0; j< numThread; j++){
-                try {
-                  threads[j].join();
-                } catch (InterruptedException ie) {}
-              }
-              long endTime = System.currentTimeMillis();
-              long time  = endTime - startTime;
-  
-              System.out.println("With "+ numThread +" threads: " + time + " ms / final counter value: " + Incrementer.c);
+          long endTime = System.currentTimeMillis(); 
+          System.out.println("With " + n + " threads execution time: " + (endTime - startTime) + " ms"); 
       }
   }
   
   /* The incrementing counter based on AtomicInteger */ 
   static class AtomicInc implements Runnable { 
       public static volatile AtomicInteger c = new AtomicInteger(); 
+      /*
+      public static int expect = 0; 
+      */
       public int m; 
       public int n; 
       public AtomicInc(int m_val, int n_val) { 
@@ -173,24 +197,7 @@ public class q5 {
           }
   
           long endTime = System.currentTimeMillis(); 
-          System.out.println("With " + n + " threads: " + (endTime - startTime) + " ms / final counter value: " + c); 
-      }
-  }
-
-  /* Syncrhonized counter */
-  static class SyncCnt {
-      private int cnt = 0; 
-      public synchronized void inc() {
-          cnt++; 
-      }
-      public synchronized void dec() {
-          cnt--; 
-      }
-      public int get() { 
-          return cnt; 
-      }
-      public void rst() { 
-          cnt = 0; 
+          System.out.println("With " + n + " threads execution time: " + (endTime - startTime) + " ms"); 
       }
   }
 
@@ -239,7 +246,7 @@ public class q5 {
           }
   
           long endTime = System.currentTimeMillis(); 
-          System.out.println("With " + n + " threads: " + (endTime - startTime) + " ms / final counter value: " + c.get()); 
+          System.out.println("With " + n + " threads execution time: " + (endTime - startTime) + " ms"); 
       }
   }
 
@@ -294,7 +301,7 @@ public class q5 {
           }
   
           long endTime = System.currentTimeMillis(); 
-          System.out.println("With " + n + " threads: " + (endTime - startTime) + " ms / final counter value: " + c); 
+          System.out.println("With " + n + " threads execution time: " + (endTime - startTime) + " ms"); 
       }
   }
 
@@ -304,10 +311,9 @@ public class q5 {
     System.out.println( "#> (a) Using Peterson's Tournament Algorithm" );
     System.out.println( "#-------------------------------------------------");
 
-    int [] numThreads = new int[]{1, 2, 4, 8}; 
-    for ( int i : numThreads ) {
-      Tournament.Incrementer.c = 0; 
-      Tournament.main_a(i); 
+    for ( int i = 1; i < 9; i++ ) {
+      PTournamentInc.c = 0; 
+      PTournamentInc.main_a(i); 
     }
 
     /* (b) */ 
