@@ -1,188 +1,40 @@
 #-------------------------------------------------
 #> (a) Using Peterson's Tournament Algorithm
 #-------------------------------------------------
-Current counter value: 1200000
-Execution time: 25 ms
-Current counter value: 1800831
-Current counter value: 2400000
-Execution time: 22 ms
-Current counter value: 2800265
-Current counter value: 3200000
-Current counter value: 3600000
-Execution time: 48 ms
-Current counter value: 3900000
-Current counter value: 4200278
-Current counter value: 4500000
-Current counter value: 4800000
-Execution time: 39 ms
-Current counter value: 5040140
-Current counter value: 5280181
-Current counter value: 5520069
-Current counter value: 5760056
-Current counter value: 6000000
-Execution time: 36 ms
-Current counter value: 6200171
-Current counter value: 6400086
-Current counter value: 6600068
-Current counter value: 6800187
-Current counter value: 7000074
-Current counter value: 7200000
-Execution time: 36 ms
-Current counter value: 7371569
-Current counter value: 7542903
-Current counter value: 7714287
-Current counter value: 7885776
-Current counter value: 8057178
-Current counter value: 8228626
-Current counter value: 8400003
-Execution time: 54 ms
-Current counter value: 8550605
-Current counter value: 8700232
-Current counter value: 8850068
-Current counter value: 9000233
-Current counter value: 9150003
-Current counter value: 9300227
-Current counter value: 9450285
-Current counter value: 9600003
-Execution time: 16 ms
+With 1 threads: 26 ms / final counter value: 1200000
+With 2 threads: 112 ms / final counter value: 1200000
+With 4 threads: 234 ms / final counter value: 1200000
+With 8 threads: 624 ms / final counter value: 1200000
 #-------------------------------------------------
 #> (b) Using Java's AtomicInteger
 #-------------------------------------------------
-Current counter value: 1200000
-Execution time: 23 ms
-Current counter value: 2330322
-Current counter value: 2400000
-Execution time: 17 ms
-Current counter value: 3536686
-Current counter value: 3564669
-Current counter value: 3600000
-Execution time: 37 ms
-Current counter value: 4199967
-Current counter value: 4200393
-Current counter value: 4798566
-Current counter value: 4800000
-Execution time: 15 ms
-Current counter value: 5127308
-Current counter value: 5696488
-Current counter value: 5758458
-Current counter value: 5760000
-Current counter value: 6000000
-Execution time: 31 ms
-Current counter value: 6582128
-Current counter value: 6791510
-Current counter value: 6792439
-Current counter value: 6890668
-Current counter value: 7096106
-Current counter value: 7200000
-Execution time: 34 ms
-Current counter value: 7674426
-Current counter value: 7707639
-Current counter value: 7953052
-Current counter value: 8229786
-Current counter value: 8252127
-Current counter value: 8366053
-Current counter value: 8400003
-Execution time: 33 ms
-Current counter value: 8711667
-Current counter value: 8841536
-Current counter value: 8853723
-Current counter value: 9140645
-Current counter value: 9253134
-Current counter value: 9400867
-Current counter value: 9450003
-Current counter value: 9600003
-Execution time: 24 ms
+With 1 threads: 21 ms / final counter value: 1200000
+With 2 threads: 30 ms / final counter value: 1200000
+With 3 threads: 12 ms / final counter value: 1200000
+With 4 threads: 23 ms / final counter value: 1200000
+With 5 threads: 21 ms / final counter value: 1200000
+With 6 threads: 15 ms / final counter value: 1200000
+With 7 threads: 28 ms / final counter value: 1200003
+With 8 threads: 11 ms / final counter value: 1200000
 #-------------------------------------------------
 #> (c) Using Java's synchronized construct
 #-------------------------------------------------
-Current counter value: 1200000
-Execution time: 44 ms
-Current counter value: 2285474
-Current counter value: 2400000
-Execution time: 57 ms
-Current counter value: 3186763
-Current counter value: 3502600
-Current counter value: 3600000
-Execution time: 41 ms
-Current counter value: 4580509
-Current counter value: 4755458
-Current counter value: 4787605
-Current counter value: 4800000
-Execution time: 52 ms
-Current counter value: 5419455
-Current counter value: 5844705
-Current counter value: 5905440
-Current counter value: 5934769
-Current counter value: 6000000
-Execution time: 49 ms
-Current counter value: 6424881
-Current counter value: 6793571
-Current counter value: 6899808
-Current counter value: 7050538
-Current counter value: 7157543
-Current counter value: 7200000
-Execution time: 52 ms
-Current counter value: 7896166
-Current counter value: 8005656
-Current counter value: 8124723
-Current counter value: 8145379
-Current counter value: 8210859
-Current counter value: 8252107
-Current counter value: 8400003
-Execution time: 49 ms
-Current counter value: 8696630
-Current counter value: 8701315
-Current counter value: 8981234
-Current counter value: 9235293
-Current counter value: 9251583
-Current counter value: 9518442
-Current counter value: 9586081
-Current counter value: 9600003
-Execution time: 48 ms
+With 1 threads: 43 ms / final counter value: 1200000
+With 2 threads: 51 ms / final counter value: 1200000
+With 3 threads: 81 ms / final counter value: 1200000
+With 4 threads: 65 ms / final counter value: 1200000
+With 5 threads: 67 ms / final counter value: 1200000
+With 6 threads: 44 ms / final counter value: 1200000
+With 7 threads: 40 ms / final counter value: 1200003
+With 8 threads: 51 ms / final counter value: 1200000
 #-------------------------------------------------
 #> (d) Using Java's ReentrantLock
 #-------------------------------------------------
-Current counter value: 1200000
-Execution time: 24 ms
-Current counter value: 1800000
-Current counter value: 2400000
-Execution time: 25 ms
-Current counter value: 3033079
-Current counter value: 3200000
-Current counter value: 3600000
-Execution time: 16 ms
-Current counter value: 4500000
-Current counter value: 4500000
-Current counter value: 4500000
-Current counter value: 4800000
-Execution time: 17 ms
-Current counter value: 5040000
-Current counter value: 5280000
-Current counter value: 5520000
-Current counter value: 5760000
-Current counter value: 6000000
-Execution time: 17 ms
-Current counter value: 6200000
-Current counter value: 6400000
-Current counter value: 6600000
-Current counter value: 6800000
-Current counter value: 7000000
-Current counter value: 7200000
-Execution time: 15 ms
-Current counter value: 7371429
-Current counter value: 7542858
-Current counter value: 7714287
-Current counter value: 7885716
-Current counter value: 8057145
-Current counter value: 8228574
-Current counter value: 8400003
-Execution time: 16 ms
-Current counter value: 8550003
-Current counter value: 8700003
-Current counter value: 8850003
-Current counter value: 9000003
-Current counter value: 9150003
-Current counter value: 9300003
-Current counter value: 9450003
-Current counter value: 9600003
-Execution time: 16 ms
+With 1 threads: 19 ms / final counter value: 1200000
+With 2 threads: 35 ms / final counter value: 1200000
+With 3 threads: 37 ms / final counter value: 1200000
+With 4 threads: 35 ms / final counter value: 1200000
+With 5 threads: 37 ms / final counter value: 1200000
+With 6 threads: 38 ms / final counter value: 1200000
+With 7 threads: 40 ms / final counter value: 1200003
+With 8 threads: 35 ms / final counter value: 1200000
