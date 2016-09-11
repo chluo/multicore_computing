@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.locks.* ; 
 import java.util.concurrent.atomic.* ; 
 
-public class q5 {
+public class PIncrement {
 
   /* The incrementing counter based on Peterson's Algorithm */
   static class Tournament {
