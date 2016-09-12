@@ -15,6 +15,7 @@
 \usepackage{enumitem}
 \usepackage{amsmath}
 \usepackage{graphicx}
+\usepackage[margin=1in]{geometry}
 
 \lstset{basicstyle=\footnotesize\ttfamily,breaklines=true}
 \lstset{  
@@ -38,16 +39,16 @@ TACC User IDs:
 \section*{Question 1}
 
 \textbf{Part (a)}
-
+\vspace{-1ex}
 \begin{itemize} 
-\item Assuming other parts of the program can be sped up by the factor of $n$, then the overall speedup is $$Speedup = \dfrac{1}{0.4+\dfrac{0.6}{n}}$$  \\
-\item Assuming the method M accounts for $x$ of the program's execution time on a single-core processor, M can be sped up by $2^3$ and other parts of the program can be sped up by the factor of $n$, then the overall speedup is $$Speedup = \dfrac{1}{\dfrac{x}{8} + \dfrac{(1-x)}{n}}$$
-So in order to double the speedup, we require $$\dfrac{1}{ \dfrac{x}{8} + \dfrac{(1-x)}{n}} = 2\times\dfrac{1}{0.4+\dfrac{0.6}{n}}$$ 
-which leads to $$x = \dfrac{0.2n - 0.7}{0.125n - 1}$$ \\
-Therefore, M must account for $(0.2n - 0.7)/(0.125n - 1)$ of the total execution time \textbf{on a single-core processor} in order to double the overall speedup of the program. 
+\item Assuming other parts of the program can be sped up by the factor of $n$, then the overall speedup is $$Speedup = \dfrac{1}{0.4+\dfrac{0.6}{n}}$$ Therefore, the limit of the speedup when $n \rightarrow \infty$ is $\dfrac{1}{0.4} = 2.5$
+\item Assuming the method M accounts for $x$ of the program's execution time on a single-core processor, M can be sped up by $3$ and other parts of the program can be sped up by the factor of $n$, then the overall speedup is $$Speedup = \dfrac{1}{\dfrac{x}{3} + \dfrac{(1-x)}{n}}$$
+So in order to double the speedup, we require $$\dfrac{1}{ \dfrac{x}{3} + \dfrac{(1-x)}{n}} = 2\times\dfrac{1}{x+\dfrac{1 - x}{n}}$$ 
+which leads to $$x = \dfrac{3}{n + 3}$$ \\
+Therefore, M must account for $3/(n + 3)$ of the total execution time \textbf{on a single-core processor} in order to double the overall speedup of the program. 
 \end{itemize}
 
-\textbf{Part (b)} \\ 
+\textbf{Part (b)}
 
 Assuming the parts of the program that can be totally parallelized account for $P$ of the total execution time on a single-core processor, and all of the other parts of the program, which accounts for $(1-P)$ of the total execution time on a single-core processor, are not able to gain any speedup from the multicore architecture, then we have 
 $$S_2 = \dfrac{1}{(1-P) + \dfrac{P}{2}}$$ and $$S_n = \dfrac{1}{(1-P) + \dfrac{P}{n}}$$
@@ -123,7 +124,7 @@ gate[i] = 0;
 
 \section*{Question 5}  
 * Code submitted on Canvas. The execution time plot is shown in Fig 1. 
-\begin{figure} 
+\begin{figure}[h] 
 	 \includegraphics[width=\linewidth]{plot.png}
 	 \caption{Execution time using the four methods}
 \end{figure} 

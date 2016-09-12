@@ -255,16 +255,11 @@ public class PIncrement {
           n = n_val; 
       }
       public void run() { 
-          complete = false; 
-          lock.lock(); 
-          try { 
-              for ( int i = 0; i < Math.ceil(m/(double)n); i++ ) {
-                  c++; 
-              }
-          } finally { 
-              lock.unlock(); 
+          for ( int i = 0; i < Math.ceil(m/(double)n); i++ ) {
+            lock.lock(); 
+            c++; 
+            lock.unlock(); 
           }
-          complete = true; 
       }
       public static void main_d(int n_thread) { 
           int m = 1200000; 
