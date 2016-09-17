@@ -14,8 +14,9 @@ private:
   double y; 
 
   double genRandom(void) {
-    std::default_random_engine gen; 
-    std::uniform_real_distribution<double> dist(0, 1); 
+    std::random_device rd; 
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<double> dist(0.0, 1.0); 
     return dist(gen); 
   }
 
@@ -38,10 +39,10 @@ double MonteCarloPi(int s) {
   int c = 0;
   int i; 
 
-  #pragma omp parallel for  
+  //#pragma omp parallel for  
   for (i = 0; i < s; i++) {
     if (RandomPoint().isInCircle()) 
-      #pragma omp critical  
+      //#pragma omp critical  
       c++; 
   }
 
