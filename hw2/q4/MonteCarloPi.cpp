@@ -1,6 +1,10 @@
 #include <iostream> 
 #include <cstdlib> 
 #include <ctime> 
+#include <omp.h>
+#include <random> 
+
+/* This program requires c++11 */
 
 using std::cout; 
 
@@ -10,7 +14,9 @@ private:
   double y; 
 
   double genRandom(void) {
-    return (double)rand() / (RAND_MAX + 1.0); 
+    std::default_random_engine gen; 
+    std::uniform_real_distribution<double> dist(0, 1); 
+    return dist(gen); 
   }
 
 public: 
@@ -29,11 +35,10 @@ public:
 }; 
 
 double MonteCarloPi(int s) { 
-  srand(time(0)); 
   int c = 0;
   int i; 
 
-  #pragma omp parallel for shared(c) private(i)
+  #pragma omp parallel for  
   for (i = 0; i < s; i++) {
     if (RandomPoint().isInCircle()) 
       #pragma omp critical  
@@ -44,11 +49,10 @@ double MonteCarloPi(int s) {
 }
 
 int main(void) {
-  clock_t start, end; 
-  start = clock(); 
+  double start = omp_get_wtime(); 
   cout << MonteCarloPi(1000000) << '\n'; 
-  end   = clock(); 
-  cout << "Execution Time: " << (double)(end - start) << '\n'; 
+  double end   = omp_get_wtime(); 
+  cout << "Execution Time: " << (end - start) << '\n'; 
 
   return 0; 
 }
