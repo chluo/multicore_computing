@@ -39,10 +39,10 @@ double MonteCarloPi(int s) {
   int c = 0;
   int i; 
 
-  //#pragma omp parallel for  
+  #pragma omp parallel for  
   for (i = 0; i < s; i++) {
     if (RandomPoint().isInCircle()) 
-      //#pragma omp critical  
+      #pragma omp critical  
       c++; 
   }
 
