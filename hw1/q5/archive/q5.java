@@ -19,18 +19,6 @@ public class q5 {
   
       /* Get the total number of gates */
       private int getNumGate() {
-        /* 
-         * For power-of-2 number of threads, 
-         * the number of gates is simply (n - 1). 
-         * For other number of threads, 
-         * increase the number to the nearest even number m, 
-         * and then the number of gates m. 
-         */
-
-         // int    m = (n % 2 != 0)? n + 1 : n; 
-         // double l = Math.log10((double)m) / Math.log10(2.0);
-         // return l == Math.floor(l) ? m - 1: m; 
-
          return n - 1; // Only consider 1, 2, 4 or 8 threads
       }
 
@@ -43,10 +31,13 @@ public class q5 {
           n = n_val; 
           gate  = new int[n + 1]; 
           last  = new AtomicInteger[getNumGate() + 1]; 
+
+          for (int i = 0; i < last.length; i++ ) 
+            last[i] = new AtomicInteger(0); 
       }
   
-      /* The i-th thread */
-      /* i = 1: n */
+      /* The i-th thread    */
+      /* i = 1: n           */
       /* k = 1: gate.length */
       public void lock(int pid) {
         int i = pid + 1; 
@@ -54,44 +45,24 @@ public class q5 {
   
         while ( k > 0 ) {
           gate[i] = k; 
-          last[k] = new AtomicInteger(i); 
-          // System.out.println("Thread " + i + " is now at gate " + k + " . "); 
+          last[k].getAndSet(i); 
   
           /* The smallest gate number in the current level */
           int check_gate = (int) Math.pow(2, Math.floor(log2((double)k))); 
-          // System.out.println("Thread " + i + " is now checking gate " + check_gate + " . "); 
   
-          for ( int j = 1; j < n + 1; j++ ) {
-            while ( j != i && last[k].get() == i && (gate[j] < check_gate || gate[j] == k) && gate[j] != 0 );   
-          } // for ( int j = 1; j < n + 1; j++ )
+          for ( int j = 1; j < n + 1; j++ ) 
+            while ( j != i && last[k].get() == i && (gate[j] < check_gate || gate[j] == k));   
+          // while (last[k].get() == i); 
+          // System.out.println("PID " + i + " gets through") ;
   
+          // last[k].getAndSet(0); 
           k = k/2; 
         } // while ( k > 0 )
   
-        // System.out.println("Thread " + i + " is now entering CS. "); 
       } // public void lock()
   
       public void unlock(int pid) {
-          int i = pid + 1;
-          gate[i] = 0; 
-          // System.out.println("Thread " + i + " is now leaving CS. "); 
-      }
-  }
-
-  /* Syncrhonized counter */
-  static class SyncCnt {
-      private int cnt = 0; 
-      public synchronized void inc() {
-          cnt++; 
-      }
-      public synchronized void dec() {
-          cnt--; 
-      }
-      public int get() { 
-          return cnt; 
-      }
-      public void rst() { 
-          cnt = 0; 
+          gate[pid + 1] = Integer.MAX_VALUE; 
       }
   }
 
@@ -102,14 +73,16 @@ public class q5 {
       public int m; 
       public int n; 
       private static PTournamentLock lock; 
+      private int numIncr; 
       public PTournamentInc(int m_val, int n_val, int pid_val) { 
           m = m_val; 
           n = n_val; 
+          numIncr = (int) Math.ceil(m/(double)n);
           pid = pid_val; 
           lock = new PTournamentLock(n); 
       }
       public void run() { 
-          for ( int i = 0; i < Math.ceil(m/(double)n); i++ ) {
+          for ( int i = 0; i < numIncr; i++ ) {
             lock.lock(pid); 
             c++; 
             lock.unlock(pid); 
@@ -193,6 +166,24 @@ public class q5 {
           System.out.println("With " + n + " threads: " + (endTime - startTime) + " ms / final counter value: " + c); 
       }
   }
+
+  /* Syncrhonized counter */
+  static class SyncCnt {
+      private int cnt = 0; 
+      public synchronized void inc() {
+          cnt++; 
+      }
+      public synchronized void dec() {
+          cnt--; 
+      }
+      public int get() { 
+          return cnt; 
+      }
+      public void rst() { 
+          cnt = 0; 
+      }
+  }
+
 
   /* The incrementing counter based on the synchronized counter */
   static class SyncInc implements Runnable { 
