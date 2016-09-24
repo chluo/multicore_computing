@@ -66,14 +66,18 @@ public class PIncrement {
       public int n; 
       public int pid; 
 
-      public FastMutexInc(int m_that, int n_that, int pid_that, FastMutex lock_that) { 
+      public FastMutexInc(int m_that, int n_that, int pid_that) { 
           this.m    = m_that; 
           this.n    = n_that; 
           this.pid  = pid_that; 
-          this.lock = lock_that; 
+      }
+
+      public static void newLock(int n_val) {
+        FastMutexInc.lock = new FastMutex(n_val); 
       }
 
       public void run() { 
+        /* 
         lock.lock(pid); 
         try {
           for ( int i = 0; i < Math.ceil(m/(double)n); i++ ) {
@@ -82,7 +86,7 @@ public class PIncrement {
         } finally {
           lock.unlock(pid); 
         }
-        /*
+        */
         for ( int i = 0; i < Math.ceil(m/(double)n); i++ ) {
           lock.lock(pid); 
           try {
@@ -91,19 +95,19 @@ public class PIncrement {
             lock.unlock(pid); 
           }
         }
-        */
       }
 
-      public static void fast_mutex(int n_thread) { 
+      public static void doit(int n_thread) { 
           int m = 1200000; 
           int n = n_thread; 
-          FastMutex lock = new FastMutex(n); 
   
           FastMutexInc [] f_array = new FastMutexInc[n]; 
           Thread       [] t_array = new Thread[n]; 
+
+          FastMutexInc.newLock(n); 
   
           for (int i = 0; i < n; i++ ) { 
-              f_array[i] = new FastMutexInc(m, n, i, lock); 
+              f_array[i] = new FastMutexInc(m, n, i); 
               t_array[i] = new Thread(f_array[i]); 
           }
   
@@ -131,7 +135,7 @@ public class PIncrement {
     private AtomicInteger [] number; 
 
     public Bakery(int n_that) {
-      this.n    = n_that; 
+      this.n        = n_that; 
       this.choosing = new AtomicInteger[n]; 
       this.number   = new AtomicInteger[n]; 
       for (int i = 0; i < n; i++) {
@@ -146,19 +150,21 @@ public class PIncrement {
         if (number[j].get() > number[i].get()) 
           number[i].getAndSet(number[j].get()); 
       }
-      number[i].getAndIncrement(); 
+      number  [i].getAndIncrement(); 
       choosing[i].getAndSet(0); 
 
       for (int j = 0; j < n; j++) {
         while (choosing[j].get() == 1); 
-        while ((number[j].get() != 0)&& 
-              ((number[j].get() < number[i].get()) || 
-              ((number[j].get() == number[i].get())&& j < i))); 
+        while ((number[j].get() != 0) && 
+              ((number[j].get() <  number[i].get()) || 
+              ((number[j].get() == number[i].get()) && j < i)));
       }
+      // System.out.println("PID " + i + " enters CS"); 
     }
 
     public void unlock(int i) {
       number[i].getAndSet(0); 
+      // System.out.println("PID " + i + " leaves CS"); 
     }
   }
 
@@ -169,14 +175,18 @@ public class PIncrement {
       public int n; 
       public int pid; 
 
-      public BakeryInc(int m_that, int n_that, int pid_that, Bakery lock_that) { 
+      public BakeryInc(int m_that, int n_that, int pid_that) { 
           this.m    = m_that; 
           this.n    = n_that; 
           this.pid  = pid_that; 
-          this.lock = lock_that; 
+      }
+
+      public static void newLock(int n_val) {
+        BakeryInc.lock = new Bakery(n_val); 
       }
 
       public void run() { 
+        /*
         lock.lock(pid); 
         try {
           for ( int i = 0; i < Math.ceil(m/(double)n); i++ ) {
@@ -185,7 +195,7 @@ public class PIncrement {
         } finally {
           lock.unlock(pid); 
         }
-        /*
+        */
         for ( int i = 0; i < Math.ceil(m/(double)n); i++ ) {
           lock.lock(pid); 
           try {
@@ -194,19 +204,19 @@ public class PIncrement {
             lock.unlock(pid); 
           }
         }
-        */
       }
 
-      public static void fast_mutex(int n_thread) { 
+      public static void doit(int n_thread) { 
           int m = 1200000; 
           int n = n_thread; 
-          Bakery lock = new Bakery(n); 
   
           BakeryInc [] f_array = new BakeryInc[n]; 
-          Thread       [] t_array = new Thread[n]; 
+          Thread    [] t_array = new Thread[n]; 
+
+          BakeryInc.newLock(n); 
   
           for (int i = 0; i < n; i++ ) { 
-              f_array[i] = new BakeryInc(m, n, i, lock); 
+              f_array[i] = new BakeryInc(m, n, i); 
               t_array[i] = new Thread(f_array[i]); 
           }
   
@@ -235,7 +245,7 @@ public class PIncrement {
 
     for (int i : numThreads) {
       FastMutexInc.c = 0; 
-      FastMutexInc.fast_mutex(i); 
+      FastMutexInc.doit(i); 
     }
 
     /* (b) */ 
@@ -245,7 +255,7 @@ public class PIncrement {
 
     for (int i : numThreads) {
       BakeryInc.c = 0; 
-      BakeryInc.fast_mutex(i); 
+      BakeryInc.doit(i); 
     }
 
   }
