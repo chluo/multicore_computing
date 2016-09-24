@@ -1,5 +1,6 @@
 import java.lang.* ; 
 import java.util.concurrent.atomic.* ; 
+import java.util.concurrent.locks.*  ;
 
 public class PIncrement {
 
@@ -22,10 +23,10 @@ public class PIncrement {
 
     public void lock(int pid) {
       while(true) { 
-        flag[pid].getAndSet(1); 
+        flag[pid].set(1); 
         x = pid; 
         if (y != -1) {
-          flag[pid].getAndSet(0); 
+          flag[pid].set(0); 
           while (y != -1); 
           continue; 
         }
@@ -36,7 +37,7 @@ public class PIncrement {
             return; 
           }
           else {
-            flag[pid].getAndSet(0); 
+            flag[pid].set(0); 
             for (int j = 0; j < flag.length; j++) 
               while (flag[j].get() == 1); 
             if (y == pid) {
@@ -55,7 +56,7 @@ public class PIncrement {
     public void unlock(int pid) {
       // System.out.println("PID " + pid + " leaves CS"); 
       y = -1; 
-      flag[pid].getAndSet(0); 
+      flag[pid].set(0); 
     }
   }
 
@@ -131,39 +132,41 @@ public class PIncrement {
    */
   static class Bakery { 
     private int n; 
-    private AtomicInteger [] choosing; 
+    private AtomicBoolean [] choosing; 
     private AtomicInteger [] number; 
 
     public Bakery(int n_that) {
       this.n        = n_that; 
-      this.choosing = new AtomicInteger[n]; 
+      this.choosing = new AtomicBoolean[n]; 
       this.number   = new AtomicInteger[n]; 
       for (int i = 0; i < n; i++) {
-        choosing[i] = new AtomicInteger(0); 
-          number[i] = new AtomicInteger(0); 
+        choosing[i] = new AtomicBoolean(); 
+          number[i] = new AtomicInteger(); 
       }
     }
 
     public void lock(int i) {
-      choosing[i].getAndSet(1); 
+      choosing[i].set(true); 
+      int num_i = number[0].get(); 
       for (int j = 0; j < n; j++) {
-        if (number[j].get() > number[i].get()) 
-          number[i].getAndSet(number[j].get()); 
+        int num_j = number[j].get(); 
+        if (num_j > num_i) 
+          num_i = num_j; 
       }
-      number  [i].getAndIncrement(); 
-      choosing[i].getAndSet(0); 
+      number  [i].set(++num_i); 
+      choosing[i].set(false); 
 
       for (int j = 0; j < n; j++) {
-        while (choosing[j].get() == 1); 
+        while (choosing[j].get()); 
         while ((number[j].get() != 0) && 
-              ((number[j].get() <  number[i].get()) || 
-              ((number[j].get() == number[i].get()) && j < i)));
+              ((number[j].get() <  num_i) || 
+              ((number[j].get() == num_i) && j < i)));
       }
       // System.out.println("PID " + i + " enters CS"); 
     }
 
     public void unlock(int i) {
-      number[i].getAndSet(0); 
+      number[i].set(0); 
       // System.out.println("PID " + i + " leaves CS"); 
     }
   }
