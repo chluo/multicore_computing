@@ -78,16 +78,6 @@ public class PIncrement {
       }
 
       public void run() { 
-        /* 
-        lock.lock(pid); 
-        try {
-          for ( int i = 0; i < Math.ceil(m/(double)n); i++ ) {
-              c++; 
-          }
-        } finally {
-          lock.unlock(pid); 
-        }
-        */
         for ( int i = 0; i < Math.ceil(m/(double)n); i++ ) {
           lock.lock(pid); 
           try {
@@ -189,16 +179,6 @@ public class PIncrement {
       }
 
       public void run() { 
-        /*
-        lock.lock(pid); 
-        try {
-          for ( int i = 0; i < Math.ceil(m/(double)n); i++ ) {
-              c++; 
-          }
-        } finally {
-          lock.unlock(pid); 
-        }
-        */
         for ( int i = 0; i < Math.ceil(m/(double)n); i++ ) {
           lock.lock(pid); 
           try {
