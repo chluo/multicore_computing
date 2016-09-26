@@ -33,7 +33,6 @@ public class PIncrement {
         else {
           y = pid; 
           if (x == pid) {
-            // System.out.println("PID " + pid + " enters CS through the fast path"); 
             return; 
           }
           else {
@@ -41,7 +40,6 @@ public class PIncrement {
             for (int j = 0; j < flag.length; j++) 
               while (flag[j].get() == 1); 
             if (y == pid) {
-              // System.out.println("PID " + pid + " enters CS through the slow path"); 
               return; 
             }
             else {
@@ -54,7 +52,6 @@ public class PIncrement {
     }
 
     public void unlock(int pid) {
-      // System.out.println("PID " + pid + " leaves CS"); 
       y = -1; 
       flag[pid].set(0); 
     }
@@ -143,7 +140,7 @@ public class PIncrement {
         if (num_j > num_i) 
           num_i = num_j; 
       }
-      number  [i].set(++num_i); 
+      number  [i].getAndSet(++num_i); 
       choosing[i].set(false); 
 
       for (int j = 0; j < n; j++) {
@@ -152,12 +149,10 @@ public class PIncrement {
               ((number[j].get() <  num_i) || 
               ((number[j].get() == num_i) && j < i)));
       }
-      // System.out.println("PID " + i + " enters CS"); 
     }
 
     public void unlock(int i) {
       number[i].set(0); 
-      // System.out.println("PID " + i + " leaves CS"); 
     }
   }
 
