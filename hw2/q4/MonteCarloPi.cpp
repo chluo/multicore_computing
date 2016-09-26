@@ -4,9 +4,12 @@
 #include <omp.h>
 #include <random> 
 
+#define NUM_THREAD 8
+
 /* This program requires c++11 */
 
 using std::cout; 
+
 
 class RandomPoint {
 private: 
@@ -39,8 +42,10 @@ double MonteCarloPi(int s) {
   int c = 0;
   int i; 
 
-  #pragma omp parallel for  
+  omp_set_num_threads(NUM_THREAD); 
+  #pragma omp parallel for shared(c) private(i) 
   for (i = 0; i < s; i++) {
+    // printf("Thread ID: %d\n", omp_get_thread_num());  
     if (RandomPoint().isInCircle()) 
       #pragma omp critical  
       c++; 
