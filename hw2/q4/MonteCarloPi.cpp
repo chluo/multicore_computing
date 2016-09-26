@@ -18,7 +18,7 @@ private:
 
   double genRandom(void) {
     std::random_device rd; 
-    std::mt19937 gen(rd());
+    thread_local std::mt19937 gen(rd());
     std::uniform_real_distribution<double> dist(0.0, 1.0); 
     return dist(gen); 
   }
