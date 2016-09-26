@@ -87,16 +87,16 @@ tid = omp_get_thread_num();
 }
 	//determine running time after openMP calculations
 	time_elapsed = omp_get_wtime() - time_elapsed;
-	cout << time_elapsed << endl;
+	cout << "Execution time: " << time_elapsed << endl;
 	//print results
 	printf("******************************************************\n");
 	printf("Result Matrix:\n");
-	// for (i = 0; i < matrix1_row; i++)
-	// {
-	// 	for (j = 0; j < matrix2_column; j++)
-	// 		printf("%6.2f   ", result[i][j]);
-	// 	printf("\n");
-	// }
+	for (i = 0; i < matrix1_row; i++)
+	{
+		for (j = 0; j < matrix2_column; j++)
+			printf("%6.2f   ", result[i][j]);
+		printf("\n");
+	}
 	printf("******************************************************\n");
-	printf("Done.\n");
+	printf("Done.\n\n");
 }
