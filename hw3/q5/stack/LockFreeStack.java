@@ -16,14 +16,19 @@ public class LockFreeStack implements MyStack {
 	  ThreadLocal<Node> curHead = new ThreadLocal<>();  
 	  ThreadLocal<Node> newNode = new ThreadLocal<>(); 
 	  newNode.set(new Node(value));
-	  
+	   
 	  while (true) {
 		  curHead.set(head.get());
 		  if (curHead.get() == head.get()) { 
-			  newNode.get().next = curHead.get(); 
+			  if (curHead.get() != null) 
+				  newNode.get().next = curHead.get(); 
 			  if (head.compareAndSet(curHead.get(), newNode.get())) 
 				  break;
 		  }
+		  // Back off in case of failure
+		  try {
+			Thread.sleep(1);
+		  } catch (InterruptedException e) {}
 	  }
 	  
 	  return true;
@@ -39,11 +44,17 @@ public class LockFreeStack implements MyStack {
 		  curHead.set(head.get());
 		  curNext.set(head.get().next);
 		  if (curHead.get() == head.get()) {
-			  if (curHead.get() == null) throw new EmptyStack();
+			  if (curHead.get() == null) {
+				  throw new EmptyStack(); 
+			  }
 			  res.set(curHead.get().value);
 			  if (head.compareAndSet(curHead.get(), curNext.get())) 
 				  break; 
 		  }
+		  // Back off in case of failure
+		  try {
+			Thread.sleep(1);
+		  } catch (InterruptedException e) {}
 	  }
 	  return res.get();
   }
