@@ -1,14 +1,17 @@
 package queue;
 
-import java.util.concurrent.atomic.*;
-import java.util.concurrent.locks.*; 
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.*; 
 
 public class LockQueue implements MyQueue {
 	// you are free to add members
 	public AtomicInteger count; 
-	private ReentrantLock enqLock; 
-	private ReentrantLock deqLock; 
-	private Condition notEmpty; 
+	// private ReentrantLock enqLock; 
+	// private ReentrantLock deqLock; 
+	// private Condition notEmpty; 
+	private Semaphore enqLock; 
+	private Semaphore deqLock; 
+	private Semaphore notEmpty; 
 	private Node head; 
 	private Node tail; 
 	private Node dummy; 
@@ -16,9 +19,12 @@ public class LockQueue implements MyQueue {
   public LockQueue() {
 	// implement your constructor here
 	this.count = new AtomicInteger(0); 
-	this.enqLock = new ReentrantLock(); 
-	this.deqLock = new ReentrantLock(); 
-	this.notEmpty = deqLock.newCondition(); 
+	// this.enqLock = new ReentrantLock(); 
+	// this.deqLock = new ReentrantLock(); 
+	// this.notEmpty = deqLock.newCondition(); 
+	this.enqLock = new Semaphore(1);
+	this.deqLock = new Semaphore(1); 
+	this.notEmpty = new Semaphore(1); 
 	this.dummy = new Node(-1); 
 	this.head = dummy; 
 	this.tail = dummy; 
@@ -26,38 +32,50 @@ public class LockQueue implements MyQueue {
   
   public boolean enq(Integer value) {
 	// implement your enq method here
-	enqLock.lock();
+	// enqLock.lock();
+	// System.out.println("Try enq: " + value); 
 	try {
+		enqLock.acquire(); 
 		Node newNode = new Node(value); 
 		tail.next = newNode; 
 		tail = newNode; 
 		count.getAndIncrement(); 
-		notEmpty.signal(); 
+		if (notEmpty.availablePermits() == 0) {
+			notEmpty.release();
+		}
 		return true; 
 	} catch (Exception e) {
-		e.printStackTrace();
+		// e.printStackTrace();
 		return false; 
 	} finally {
-		enqLock.unlock();
+		// enqLock.unlock();
+		enqLock.release();
 	}
   }
   
   public Integer deq() {
 	// implement your deq method here
-	deqLock.lock();
+	// deqLock.lock();
+    // System.out.println("Try deq: "); 
 	try {
-		while (count.get() == 0)
-			notEmpty.await();
-		Node deqNode = head.next; 
-		head.next = deqNode.next; 
-		deqNode.next = null;  
+		deqLock.acquire();
+		while (count.get() == 0) {
+			// notEmpty.await();
+			deqLock.release();
+			notEmpty.acquire();
+			deqLock.acquire();
+		}
+		ThreadLocal<Node> deqNode = new ThreadLocal<>(); 
+		deqNode.set(head.next); 
+		head.next = deqNode.get().next;  
 		count.getAndDecrement(); 
-		return deqNode.value; 
+		return deqNode.get().value; 
 	} catch (Exception e) {
 		e.printStackTrace();
 		return null; 
 	} finally {
-		deqLock.unlock();
+		// deqLock.unlock();
+		deqLock.release();
 	}
   }
   
