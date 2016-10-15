@@ -3,7 +3,7 @@ package queue;
 import java.util.ArrayList;
 
 public class QueueMain {
-	public static LockQueue q = new LockQueue(); 
+	public static LockFreeQueue q = new LockFreeQueue(); 
 	public static ArrayList<Integer> res = new ArrayList<>(); 
 	
 	public static class thread1 implements Runnable {
