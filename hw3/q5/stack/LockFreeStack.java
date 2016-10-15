@@ -13,22 +13,15 @@ public class LockFreeStack implements MyStack {
 	
   public boolean push(Integer value) {
 	  // implement your push method here
-	  ThreadLocal<Node> curHead = new ThreadLocal<>();  
-	  ThreadLocal<Node> newNode = new ThreadLocal<>(); 
-	  newNode.set(new Node(value));
+	  Node curHead;  
+	  Node newNode = new Node(value); 
 	   
 	  while (true) {
-		  curHead.set(head.get());
-		  if (curHead.get() == head.get()) { 
-			  if (curHead.get() != null) 
-				  newNode.get().next = curHead.get(); 
-			  if (head.compareAndSet(curHead.get(), newNode.get())) 
-				  break;
-		  }
+		  curHead = head.get(); 
+		  newNode.next = curHead; 
+		  if (head.compareAndSet(curHead, newNode)) break;
 		  // Back off in case of failure
-		  try {
-			Thread.sleep(1);
-		  } catch (InterruptedException e) {}
+		  else Thread.yield(); 
 	  }
 	  
 	  return true;
@@ -36,27 +29,22 @@ public class LockFreeStack implements MyStack {
   
   public Integer pop() throws EmptyStack {
 	  // implement your pop method here
-	  ThreadLocal<Node> curHead = new ThreadLocal<>(); 
-	  ThreadLocal<Node> curNext = new ThreadLocal<>(); 
-	  ThreadLocal<Integer>  res = new ThreadLocal<>(); 
+	  Node curHead; 
+	  Node curNext; 
+	  Integer  res; 
 	  
 	  while (true) {
-		  curHead.set(head.get());
-		  curNext.set(head.get().next);
-		  if (curHead.get() == head.get()) {
-			  if (curHead.get() == null) {
-				  throw new EmptyStack(); 
-			  }
-			  res.set(curHead.get().value);
-			  if (head.compareAndSet(curHead.get(), curNext.get())) 
-				  break; 
+		  curHead = head.get();
+		  curNext = head.get().next;
+		  if (curHead == null) {
+			  throw new EmptyStack(); 
 		  }
+		  res = curHead.value;
+		  if (head.compareAndSet(curHead, curNext)) break; 
 		  // Back off in case of failure
-		  try {
-			Thread.sleep(1);
-		  } catch (InterruptedException e) {}
+		  else Thread.yield();
 	  }
-	  return res.get();
+	  return res;
   }
   
   protected class Node {
