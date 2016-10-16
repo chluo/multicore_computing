@@ -1,22 +1,20 @@
 package stack;
 
-import java.util.ArrayList;
-
 public class StackMain {
 	public static LockFreeStack q = new LockFreeStack(); 
-	public static ArrayList<Integer> res = new ArrayList<>(); 
+	public static Integer res[] = new Integer[4]; 
 	
 	public static class thread1 implements Runnable {
 		public void run() {
 			q.push(1); 
 			q.push(2); 
 			try {
-				res.add(q.pop());
+				res[0] = q.pop();
 			} catch (EmptyStack e) {
 				e.printStackTrace();
 			}
 			try {
-				res.add(q.pop());
+				res[1] = q.pop();
 			} catch (EmptyStack e) {
 				e.printStackTrace();
 			}
@@ -28,12 +26,12 @@ public class StackMain {
 			q.push(3); 
 			q.push(4); 
 			try {
-				res.add(q.pop());
+				res[2] = q.pop();
 			} catch (EmptyStack e) {
 				e.printStackTrace();
 			} 
 			try {
-				res.add(q.pop());
+				res[3] = q.pop();
 			} catch (EmptyStack e) {
 				e.printStackTrace();
 			}
@@ -41,8 +39,8 @@ public class StackMain {
 	}
 	
 	public static void printRes () {
-		for (int i = 0; i < res.size(); i++) 
-			System.out.print(res.get(i) + " ");
+		for (int i = 0; i < res.length; i++) 
+			System.out.print(res[i] + " ");
 		System.out.print("\n");
 	}
 	
@@ -61,4 +59,5 @@ public class StackMain {
 		
 		printRes(); 
 	}
+	
 }

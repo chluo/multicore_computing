@@ -1,9 +1,73 @@
 package queue;
 
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.*;
 
 public class LockFreeQueue implements MyQueue {
+	private AtomicInteger count; 
+	private Node dummy; 
+	private AtomicStampedReference<Node> head; 
+	private AtomicStampedReference<Node> tail; 	
+	public LockFreeQueue() {
+		this.count = new AtomicInteger(0); 
+		this.dummy = new Node(-1); 
+		this.head = new AtomicStampedReference<>(dummy, 0); 
+		this.tail = new AtomicStampedReference<>(dummy, 0); 
+	}
+	public boolean enq(Integer value) {
+		AtomicStampedReference<Node> newNode = new AtomicStampedReference<>(new Node(value), 0); 
+		AtomicStampedReference<Node> curTail = new AtomicStampedReference<>(null, 0); 
+		AtomicStampedReference<Node> curNext = new AtomicStampedReference<>(null, 0); 
+		while (true) {
+			curTail.set(tail.getReference(), tail.getStamp());
+			curNext.set(curTail.getReference().next.getReference(), curTail.getReference().next.getStamp());
+			if (curTail.getReference() == tail.getReference() && curTail.getStamp() == tail.getStamp()) {
+				if (curNext.getReference() == null) {
+					if (curTail.getReference().next.compareAndSet(curNext.getReference(), newNode.getReference(), curNext.getStamp(), curNext.getStamp() + 1))
+						break;
+				}
+				else 
+					tail.compareAndSet(curTail.getReference(), curNext.getReference(), curTail.getStamp(), curTail.getStamp() + 1); 
+			}
+		}
+		if (tail.compareAndSet(curTail.getReference(), newNode.getReference(), curTail.getStamp(), curTail.getStamp() + 1)) {
+			count.getAndIncrement(); 
+			return true; 
+		}
+		return false; 
+	}	
+	public Integer deq() {
+		AtomicStampedReference<Node> curHead = new AtomicStampedReference<>(null, 0);
+		AtomicStampedReference<Node> curTail = new AtomicStampedReference<>(null, 0);
+		AtomicStampedReference<Node> curNext = new AtomicStampedReference<>(null, 0);
+		int res; 
+		while (true) {
+			curHead.set(head.getReference(), head.getStamp());
+			curTail.set(tail.getReference(), tail.getStamp());
+			curNext.set(curHead.getReference().next.getReference(), curHead.getReference().next.getStamp());
+			if (curHead.getReference() == head.getReference() && curHead.getStamp() == head.getStamp()) {
+				if (curHead.getReference() == curTail.getReference()) {
+					if (curNext.getReference() == null) 
+						continue; 
+					tail.compareAndSet(curTail.getReference(), curNext.getReference(), curTail.getStamp(), curTail.getStamp() + 1); 
+				}
+				else {
+					res = curNext.getReference().value.intValue(); 
+					if (head.compareAndSet(curHead.getReference(), curNext.getReference(), curHead.getStamp(), curHead.getStamp() + 1)) 
+						break; 
+				}
+			}
+		}
+		return res; 
+	}
+	protected class Node {
+		public Integer value;
+		public AtomicStampedReference<Node> next;
+		public Node(Integer x) {
+			value = x;
+			next = new AtomicStampedReference<>(null, 0);
+		}
+	}
+/* 
   // you are free to add members
   private AtomicInteger count; 
   private Node dummy; 
@@ -165,11 +229,11 @@ public class LockFreeQueue implements MyQueue {
 		  value = x;
 		  next = null;
 	  }
-	  
-	  /* Added by Chunheng */ 
+	   
 	  public Node (Integer x, Node y) {
 		  value = x; 
 		  next = y; 
 	  }
   }
+*/
 }
