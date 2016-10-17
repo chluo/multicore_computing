@@ -19,11 +19,11 @@ public class LockFreeListSet implements ListSet {
 		while (true) {
 			pre.set(head.getReference(), head.isMarked());
 			cur.set(pre.getReference().next.getReference(), pre.getReference().next.isMarked());
-			while (cur.getReference().value < value && cur.getReference() != null) {
+			while (cur.getReference() != null && cur.getReference().value < value) {
 				pre.set(cur.getReference(), cur.isMarked());
 				cur.set(cur.getReference().next.getReference(), cur.getReference().next.isMarked()); 
 			}
-			if (cur.getReference().value > value) {
+			if (cur.getReference() == null || cur.getReference().value > value) {
 				newNode.next.set(cur.getReference(), cur.isMarked()); 
 				if (pre.getReference().next.compareAndSet(cur.getReference(), newNode, false, cur.isMarked())) 
 					return true; 
@@ -38,20 +38,18 @@ public class LockFreeListSet implements ListSet {
 		while (true) {
 			pre.set(head.getReference(), head.isMarked());
 			cur.set(pre.getReference().next.getReference(), pre.getReference().next.isMarked());
-			while (cur.getReference().value < value && cur.getReference() != null) {
+			while (cur.getReference() != null && cur.getReference().value < value) {
 				pre.set(cur.getReference(), cur.isMarked());
 				cur.set(cur.getReference().next.getReference(), cur.getReference().next.isMarked()); 
 			}
-			if (cur.getReference().value == value) {
-				if (!pre.isMarked()) {
-					if (pre.getReference().next.attemptMark(cur.getReference(), true)) {
-						if (pre.getReference().next.compareAndSet(cur.getReference(), cur.getReference().next.getReference(), true, cur.getReference().next.isMarked())) 
-							return true; 
-						continue; 
-					}
+			if (cur.getReference() != null && cur.getReference().value == value) {
+				if (pre.isMarked()) 
 					continue; 
-				}
-				continue; 
+				if (!pre.getReference().next.attemptMark(cur.getReference(), true)) 
+					continue; 
+				if (!pre.getReference().next.compareAndSet(cur.getReference(), cur.getReference().next.getReference(), true, cur.getReference().next.isMarked())) 
+					continue; 
+				return true;  
 			}
 			return false; 
 		}

@@ -18,16 +18,18 @@ public class FineGrainedListSet implements ListSet {
 			Node pre = head; 
 			pre.lock.lock();
 			Node cur = pre.next;
-			cur.lock.lock();
+			if (cur != null) 
+				cur.lock.lock();
 			try {
-				while (cur.value < value && cur != null) {
+				while (cur != null && cur.value < value) {
 					pre.lock.unlock();
 					pre = cur; 
 					cur = cur.next; 
-					cur.lock.lock(); 
+					if (cur != null)
+						cur.lock.lock(); 
 				}
-				if (cur.value > value) {
-					if (!pre.isDeleted && !cur.isDeleted && pre.next == cur) {
+				if (cur == null || cur.value > value) {
+					if (!pre.isDeleted && (cur == null || !cur.isDeleted) && pre.next == cur) {
 						newNode.next = cur; 
 						pre.next = newNode; 
 						return true; 
@@ -35,9 +37,10 @@ public class FineGrainedListSet implements ListSet {
 					continue; 
 				}
 				return false; 
-			} finally {
+			} catch (Exception e) {e.printStackTrace();} finally {
 				pre.lock.unlock();
-				cur.lock.unlock();
+				if (cur != null) 
+					cur.lock.unlock();
 			}
 		}
 	}
@@ -47,15 +50,16 @@ public class FineGrainedListSet implements ListSet {
 			Node pre = head; 
 			pre.lock.lock();
 			Node cur = pre.next;
-			cur.lock.lock();
+			if (cur != null) 
+				cur.lock.lock();
 			try {
-				while (cur.value < value && cur != null) {
+				while (cur != null && cur.value < value) {
 					pre.lock.unlock();
 					pre = cur; 
 					cur = cur.next; 
 					cur.lock.lock(); 
 				}
-				if (cur.value == value) {
+				if (cur != null && cur.value == value) {
 					if (!pre.isDeleted && !cur.isDeleted && pre.next == cur) {
 						cur.isDeleted = true; 
 						pre.next = cur.next; 
@@ -64,9 +68,10 @@ public class FineGrainedListSet implements ListSet {
 					continue; 
 				}
 				return false; 
-			} finally { 
+			} catch (Exception e) {e.printStackTrace();} finally { 
 				pre.lock.unlock();
-				cur.lock.unlock();
+				if (cur != null) 
+					cur.lock.unlock();
 			}
 		}
 	}

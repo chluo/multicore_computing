@@ -22,11 +22,11 @@ public class CoarseGrainedListSet implements ListSet {
 		try {
 			pre = head; 
 			cur = pre.next; 
-			while (cur.value < value && cur != null) {
+			while (cur != null && cur.value < value) {
 				pre = cur; 
 				cur = cur.next; 
 			}
-			if (cur.value > value) {
+			if (cur == null || cur.value > value) {
 				newNode.next = cur; 
 				pre.next = newNode; 
 				return true; 
@@ -44,11 +44,11 @@ public class CoarseGrainedListSet implements ListSet {
 		try {
 			pre = head; 
 			cur = pre.next; 
-			while (cur.value < value && cur != null) {
+			while (cur != null && cur.value < value) {
 				pre = cur; 
 				cur = cur.next; 
 			}
-			if (cur.value == value) {
+			if (cur != null && cur.value == value) {
 				pre.next = cur.next; 
 				return true; 
 			}
