@@ -11,7 +11,7 @@ import q3.Garden.Newton;
 
 public class Main {
 	public static void main (String args[]) {
-		Garden   garden = new Garden(); 
+		Garden   garden = new Garden(5); 
 		Newton   digger = new Newton(garden); 
 		Benjamin seeder = new Benjamin(garden); 
 		Mary     filler = new Mary(garden); 

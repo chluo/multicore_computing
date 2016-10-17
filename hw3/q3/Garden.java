@@ -4,7 +4,7 @@ import java.util.concurrent.locks.*;
 
 public class Garden {
 	// you are free to add members
-	private static int MAX = 5; 
+	private static int MAX; 
 	private static int numEmptyH = 0; 
 	private static int numSeeded = 0;
 	private static boolean shovelAvail = true; 
@@ -13,8 +13,9 @@ public class Garden {
 	private static Condition condSeeding = gardenLock.newCondition(); 
 	private static Condition condFilling = gardenLock.newCondition(); 
 
-	public Garden(){
+	public Garden(int max){
 		// implement your constructor here
+		MAX = max; 
 	}
 	public void startDigging() throws InterruptedException{
         // implement your startDigging method here
@@ -122,7 +123,7 @@ public class Garden {
 		
 		private void dig(){
 			try {
-				Thread.sleep(2);
+				Thread.sleep(3);
 			} catch (InterruptedException e) {}
 		}
 	}
@@ -145,7 +146,7 @@ public class Garden {
 		
 		private void plantSeed(){
 			try {
-				Thread.sleep(2);
+				Thread.sleep(1);
 			} catch (InterruptedException e) {}
 		}
 	}
