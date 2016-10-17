@@ -57,7 +57,8 @@ public class FineGrainedListSet implements ListSet {
 					pre.lock.unlock();
 					pre = cur; 
 					cur = cur.next; 
-					cur.lock.lock(); 
+					if (cur != null) 
+						cur.lock.lock(); 
 				}
 				if (cur != null && cur.value == value) {
 					if (!pre.isDeleted && !cur.isDeleted && pre.next == cur) {
