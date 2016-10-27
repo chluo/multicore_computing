@@ -8,7 +8,7 @@
 __global__ void shmem_reduce_kernel(int * d_out, const int * d_in)
 {
     // sdata is allocated in the kernel call: 3rd arg to <<<b, t, shmem>>>
-    __shared__ int sdata[];
+    extern __shared__ int sdata[];
 
     int myId = threadIdx.x + blockDim.x * blockIdx.x;
     int tid  = threadIdx.x;
@@ -58,7 +58,7 @@ void reduce(int * d_out, int * d_intermediate, int * d_in, int size)
 __global__ void last_digit_kernel(int * d_out, const int * d_in) 
 {
 	// sdata is allocated in the kernel call: 3rd arg to <<<b, t, shmem>>>
-    __shared__ int sdata[];
+    extern __shared__ int sdata[];
 
     int myId = threadIdx.x + blockDim.x * blockIdx.x;
     int tid  = threadIdx.x;
@@ -75,9 +75,9 @@ __global__ void last_digit_kernel(int * d_out, const int * d_in)
 * Store the data in (int * data)
 * Return the number of elements read into the array
 */ 
-int read_data(int * data) 
+int * read_data(int * size) 
 {
-	FILE * fptr = open("./inp.txt", "r"); 
+	FILE * fptr = fopen("./inp.txt", "r"); 
 	if (!fptr) {
 		printf("!! Error in opening data file \n"); 
 		exit(1); 
@@ -94,8 +94,8 @@ int read_data(int * data)
 		++i; 
 	}
 	
-	data = buffer; 
-	return i; 
+	*size = i; 
+	return buffer; 
 }
 
 int main(void)
@@ -119,9 +119,9 @@ int main(void)
                (int)devProps.clockRate);
     }
 	
-	// Data array on host
-	int * h_in; 
-	int array_size = read_data(h_in); 
+	// Data array on host 
+	int array_size = 0; 
+	int * h_in = read_data(&array_size); 
 	int array_byte = array_size * sizeof(int);
     printf(">> Number of data read in: %d\n", array_size); 
 	
@@ -170,8 +170,8 @@ int main(void)
 	*/ 
 	
 	d_out = d_intermediate; 
-	numThreadPerBlock = 512; 
-	numBlock = array_size / numThreadPerBlock; 
+	int numThreadPerBlock = 512; 
+	int numBlock = array_size / numThreadPerBlock; 
 	
 	// launch the kernel
 	cudaEventRecord(start, 0); 
@@ -186,7 +186,7 @@ int main(void)
 	cudaMemcpy(&h_out_array, d_out, sizeof(int), cudaMemcpyDeviceToHost); 
 	
 	// output the result array into file 
-	FILE * fptr = open("./out.txt", "w"); 
+	FILE * fptr = fopen("./out.txt", "w"); 
 	if (!fptr) {
 		printf("!! Error in opening output file \n"); 
 		exit(1);
