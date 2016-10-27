@@ -127,7 +127,7 @@ int main(void)
     // Data array on host 
     int array_size = 0; 
     int * h_in = read_data(&array_size); 
-    const int array_byte = array_size * sizeof(int);
+    int array_byte = array_size * sizeof(int);
     printf(">> Number of data read in: %d\n", array_size); 
     
     /* 
@@ -143,11 +143,11 @@ int main(void)
     cudaMalloc((void **) &d_out, sizeof(int));
 
     // transfer the input array to the GPU
-    cudaMemcpy(d_in, h_in, array_byte, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_in, (void *)h_in, array_byte, cudaMemcpyHostToDevice);
     cudaDeviceSynchronize(); 
     
     int * h_tmp = (int *)malloc(array_byte); 
-    cudaMemcpy(h_tmp, d_in, array_byte, cudaMemcpyDeviceToHost);    
+    cudaMemcpy((void *)h_tmp, d_in, array_byte, cudaMemcpyDeviceToHost);    
     cudaDeviceSynchronize(); 
 
     
