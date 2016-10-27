@@ -127,7 +127,7 @@ int main(void)
     // Data array on host 
     int array_size = 0; 
     int * h_in = read_data(&array_size); 
-    int array_byte = array_size * sizeof(int);
+    const int array_byte = array_size * sizeof(int);
     printf(">> Number of data read in: %d\n", array_size); 
     
     /* 
