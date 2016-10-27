@@ -22,8 +22,8 @@ __global__ void shmem_reduce_kernel(int * d_out, const int * d_in, const int siz
     {
         if (tid < s && myId < size && (myId + s) < size)
         {
-			if (sdata[tid] > sdata[tid + s])
-				sdata[tid] = sdata[tid + s]; 
+            if (sdata[tid] > sdata[tid + s])
+                sdata[tid] = sdata[tid + s]; 
         }
         __syncthreads();        // make sure all adds at one stage are done!
     }
@@ -57,7 +57,7 @@ void reduce(int * d_out, int * d_intermediate, int * d_in, int size)
 */ 
 __global__ void last_digit_kernel(int * d_out, const int * d_in) 
 {
-	// sdata is allocated in the kernel call: 3rd arg to <<<b, t, shmem>>>
+    // sdata is allocated in the kernel call: 3rd arg to <<<b, t, shmem>>>
     extern __shared__ int sdata[];
 
     int myId = threadIdx.x + blockDim.x * blockIdx.x;
@@ -66,8 +66,8 @@ __global__ void last_digit_kernel(int * d_out, const int * d_in)
     // load shared mem from global mem
     sdata[tid] = d_in[myId];
     __syncthreads();            // make sure entire block is loaded!
-	
-	d_out[myId] = sdata[tid] % 10; 
+    
+    d_out[myId] = sdata[tid] % 10; 
 }
 
 /* 
@@ -77,30 +77,30 @@ __global__ void last_digit_kernel(int * d_out, const int * d_in)
 */ 
 int * read_data(int * size) 
 {
-	FILE * fptr = fopen("./inp.txt", "r"); 
-	if (!fptr) {
-		printf("!! Error in opening data file \n"); 
-		exit(1); 
-	}
-	int cur_array_size = 10000; 
-	int * buffer = (int *)malloc(cur_array_size * sizeof(int)); 
-	
-	int i = 0; 
-	while (!feof(fptr)) {
-		if (fscanf(fptr, "%d,", &buffer[i]) != 1) {
-			printf("!! Error in importing data from file \n"); 
-			exit(1); 
-		}
-		++i; 
-		if (i >= cur_array_size) {
-			cur_array_size *= 2; 
-			buffer = (int *)realloc(buffer, cur_array_size); 
-		}
-		
-	}
-	
-	*size = i; 
-	return buffer; 
+    FILE * fptr = fopen("./inp.txt", "r"); 
+    if (!fptr) {
+        printf("!! Error in opening data file \n"); 
+        exit(1); 
+    }
+    int cur_array_size = 10000; 
+    int * buffer = (int *)malloc(cur_array_size * sizeof(int)); 
+    
+    int i = 0; 
+    while (!feof(fptr)) {
+        if (fscanf(fptr, "%d,", &buffer[i]) != 1) {
+            printf("!! Error in importing data from file \n"); 
+            exit(1); 
+        }
+        ++i; 
+        if (i >= cur_array_size) {
+            cur_array_size *= 2; 
+            buffer = (int *)realloc(buffer, cur_array_size); 
+        }
+        
+    }
+    
+    *size = i; 
+    return buffer; 
 }
 
 int main(void)
@@ -123,16 +123,16 @@ int main(void)
                (int)devProps.major, (int)devProps.minor,
                (int)devProps.clockRate);
     }
-	
-	// Data array on host 
-	int array_size = 0; 
-	int * h_in = read_data(&array_size); 
-	int array_byte = array_size * sizeof(int);
+    
+    // Data array on host 
+    int array_size = 0; 
+    int * h_in = read_data(&array_size); 
+    int array_byte = array_size * sizeof(int);
     printf(">> Number of data read in: %d\n", array_size); 
-	
-	/* 
-	* Part a 
-	*/ 
+    
+    /* 
+    * Part a 
+    */ 
 
     // declare GPU memory pointers
     int * d_in, * d_intermediate, * d_out;
@@ -144,14 +144,13 @@ int main(void)
 
     // transfer the input array to the GPU
     cudaMemcpy(d_in, h_in, array_byte, cudaMemcpyHostToDevice);
-	
-	/* 
-	cudaMemcpy(h_in, d_in, array_byte, cudaMemcpyDeviceToHost); 
-	
-	// For debug 
-	for (int i = 0; i < array_size; ++i) 
-	  	printf("%d\n", h_in[i]); 
-	*/
+    
+    int * h_tmp = (int *)malloc(array_byte); 
+    cudaMemcpy(h_tmp, d_in, array_byte, cudaMemcpyDeviceToHost); 
+    
+    // For debug 
+    for (int i = 0; i < array_size; ++i) 
+        printf("%d\n", h_tmp[i]); 
 
     cudaEvent_t start, stop;
     cudaEventCreate(&start);
@@ -165,60 +164,60 @@ int main(void)
     cudaEventElapsedTime(&elapsedTime, start, stop);
 
     // copy back the min from GPU
-	int h_out; 
+    int h_out; 
     cudaMemcpy(&h_out, d_out, sizeof(int), cudaMemcpyDeviceToHost);
 
     printf(">> Average time elapsed in part a: %f\n", elapsedTime);
     printf(">> Min value returned by device: %d\n", h_out);
 
     // free GPU memory allocation
-	// Reuse d_in for the input array of part b
-	// Reuse d_intermediate for the output array of part b
+    // Reuse d_in for the input array of part b
+    // Reuse d_intermediate for the output array of part b
     cudaFree(d_out);
-	
-	
-	/*
-	* Part b
-	*/ 
-	
-	/* 
-	d_out = d_intermediate; 
-	int numThreadPerBlock = 512; 
-	int numBlock = array_size / numThreadPerBlock; 
-	
-	// launch the kernel
-	cudaEventRecord(start, 0); 
-	last_digit_kernel<<<numBlock, numThreadPerBlock, numThreadPerBlock * sizeof(int)>>>(d_out, d_in); 
-	cudaEventRecord(stop, 0);
-	cudaEventSynchronize(stop);
-	cudaEventElapsedTime(&elapsedTime, start, stop);
-	printf(">> Average time elapsed of part b: %f\n", elapsedTime);
-	
-	// copy back the result array from GPU
-	int * h_out_array = (int *)malloc(array_size * sizeof(int)); 
-	cudaMemcpy(&h_out_array, d_out, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
-	
-	// output the result array into file 
-	FILE * fptr = fopen("./out.txt", "w"); 
-	if (!fptr) {
-		printf("!! Error in opening output file \n"); 
-		exit(1);
-	}
-	for (int i = 0; i < array_size; ++i) {
-		fprintf(fptr, "%d", h_out_array[i]); 
-		if (i < array_size - 1) 
-			fprintf(fptr, ", "); 
-	}
-	fclose(fptr); 
-	
-	// Free CPU memory allocation 
-	free(h_in); 
-	free(h_out_array); 
-	
-	// Free GPU memory allocation 
-	cudaFree(d_in); 
-	cudaFree(d_intermediate); 
-	*/ 
+    
+    
+    /*
+    * Part b
+    */ 
+    
+    /* 
+    d_out = d_intermediate; 
+    int numThreadPerBlock = 512; 
+    int numBlock = array_size / numThreadPerBlock; 
+    
+    // launch the kernel
+    cudaEventRecord(start, 0); 
+    last_digit_kernel<<<numBlock, numThreadPerBlock, numThreadPerBlock * sizeof(int)>>>(d_out, d_in); 
+    cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&elapsedTime, start, stop);
+    printf(">> Average time elapsed of part b: %f\n", elapsedTime);
+    
+    // copy back the result array from GPU
+    int * h_out_array = (int *)malloc(array_size * sizeof(int)); 
+    cudaMemcpy(&h_out_array, d_out, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
+    
+    // output the result array into file 
+    FILE * fptr = fopen("./out.txt", "w"); 
+    if (!fptr) {
+        printf("!! Error in opening output file \n"); 
+        exit(1);
+    }
+    for (int i = 0; i < array_size; ++i) {
+        fprintf(fptr, "%d", h_out_array[i]); 
+        if (i < array_size - 1) 
+            fprintf(fptr, ", "); 
+    }
+    fclose(fptr); 
+    
+    // Free CPU memory allocation 
+    free(h_in); 
+    free(h_out_array); 
+    
+    // Free GPU memory allocation 
+    cudaFree(d_in); 
+    cudaFree(d_intermediate); 
+    */ 
 
     return 0;
 }
