@@ -57,7 +57,7 @@ void reduce(int * d_out, int * d_intermediate, int * d_in, int size)
 /* 
 * GPU kernel: calculate the last digit of each element in the input array in parallel
 */ 
-__global__ void last_digit_kernel(int * d_out, const int * d_in) 
+__global__ void last_digit_kernel(int * d_out, const int * d_in, const int * size) 
 {
     // sdata is allocated in the kernel call: 3rd arg to <<<b, t, shmem>>>
     extern __shared__ int sdata[];
@@ -69,7 +69,8 @@ __global__ void last_digit_kernel(int * d_out, const int * d_in)
     sdata[tid] = d_in[myId];
     __syncthreads();            // make sure entire block is loaded!
     
-    d_out[myId] = sdata[tid] % 10; 
+	if (myId < size)
+		d_out[myId] = sdata[tid] % 10; 
 }
 
 /* 
@@ -170,14 +171,13 @@ int main(void)
     * Part b
     */ 
     
-    /* 
     d_out = d_intermediate; 
     int numThreadPerBlock = 512; 
-    int numBlock = array_size / numThreadPerBlock; 
+    int numBlock = (array_size + numThreadPerBlock - 1) / numThreadPerBlock; 
     
     // launch the kernel
     cudaEventRecord(start, 0); 
-    last_digit_kernel<<<numBlock, numThreadPerBlock, numThreadPerBlock * sizeof(int)>>>(d_out, d_in); 
+    last_digit_kernel<<<numBlock, numThreadPerBlock, numThreadPerBlock * sizeof(int)>>>(d_out, d_in, array_size); 
     cudaEventRecord(stop, 0);
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&elapsedTime, start, stop);
@@ -207,7 +207,6 @@ int main(void)
     // Free GPU memory allocation 
     cudaFree(d_in); 
     cudaFree(d_intermediate); 
-    */ 
 
     return 0;
 }
