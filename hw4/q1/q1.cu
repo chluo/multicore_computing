@@ -92,6 +92,11 @@ int * read_data(int * size)
 			exit(1); 
 		}
 		++i; 
+		if (i >= cur_array_size) {
+			cur_array_size *= 2; 
+			buffer = realloc(buffer, cur_array_size); 
+		}
+		
 	}
 	
 	*size = i; 
