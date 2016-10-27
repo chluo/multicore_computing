@@ -121,7 +121,7 @@ int main(void)
                (int)devProps.clockRate);
     }
     
-    // Data array on host 
+    // data array on host 
     int array_size = 0; 
     int * h_in = read_data(&array_size); 
     int array_byte = array_size * sizeof(int);
