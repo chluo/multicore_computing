@@ -60,7 +60,7 @@ void reduce(int * d_out, int * d_intermediate, int * d_in, int size)
 __global__ void last_digit_kernel(int * d_out, const int * d_in, const int size) 
 {
     // sdata is allocated in the kernel call: 3rd arg to <<<b, t, shmem>>>
-    extern __shared__ int sdata[];
+    // extern __shared__ int sdata[];
 
     int myId = threadIdx.x + blockDim.x * blockIdx.x;
     int tid  = threadIdx.x;
