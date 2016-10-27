@@ -130,10 +130,6 @@ int main(void)
 	int array_byte = array_size * sizeof(int);
     printf(">> Number of data read in: %d\n", array_size); 
 	
-	// For debug 
-	for (int i = 0; i < array_size; ++i) 
-		printf("%d\n", h_in[i]); 
-	
 	/* 
 	* Part a 
 	*/ 
@@ -148,6 +144,10 @@ int main(void)
 
     // transfer the input array to the GPU
     cudaMemcpy(d_in, h_in, array_byte, cudaMemcpyHostToDevice);
+	
+	// For debug 
+	for (int i = 0; i < array_size; ++i) 
+		printf("%d\n", d_in[i]); 
 
     cudaEvent_t start, stop;
     cudaEventCreate(&start);
