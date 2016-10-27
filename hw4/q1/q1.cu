@@ -57,7 +57,7 @@ void reduce(int * d_out, int * d_intermediate, int * d_in, int size)
 /* 
 * GPU kernel: calculate the last digit of each element in the input array in parallel
 */ 
-__global__ void last_digit_kernel(int * d_out, const int * d_in, const int * size) 
+__global__ void last_digit_kernel(int * d_out, const int * d_in, const int size) 
 {
     // sdata is allocated in the kernel call: 3rd arg to <<<b, t, shmem>>>
     extern __shared__ int sdata[];
