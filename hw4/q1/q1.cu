@@ -5,7 +5,7 @@
 /* 
 * GPU kernel: reduction, getting the min value in a sub-array
 */ 
-__global__ void shmem_reduce_kernel(int * d_out, const int * d_in)
+__global__ void shmem_reduce_kernel(int * d_out, const int * d_in, const, int size)
 {
     // sdata is allocated in the kernel call: 3rd arg to <<<b, t, shmem>>>
     extern __shared__ int sdata[];
@@ -20,7 +20,7 @@ __global__ void shmem_reduce_kernel(int * d_out, const int * d_in)
     // do reduction in shared mem
     for (unsigned int s = blockDim.x / 2; s > 0; s >>= 1)
     {
-        if (tid < s)
+        if (tid < s && myId < size && (myId + s) < size)
         {
             sdata[tid] = (sdata[tid] < sdata[tid + s]) ? sdata[tid] : sdata[tid + s];
         }
@@ -44,12 +44,12 @@ void reduce(int * d_out, int * d_intermediate, int * d_in, int size)
     const int maxThreadsPerBlock = 512;
     int threads = maxThreadsPerBlock;
     int blocks = size / maxThreadsPerBlock;
-    shmem_reduce_kernel<<<blocks, threads, threads * sizeof(int)>>>(d_intermediate, d_in);
+    shmem_reduce_kernel<<<blocks, threads, threads * sizeof(int)>>>(d_intermediate, d_in, size);
 
     // now we're down to one block left, so reduce it
     threads = blocks; // launch one thread for each block in prev step
     blocks = 1;
-    shmem_reduce_kernel<<<blocks, threads, threads * sizeof(int)>>>(d_out, d_intermediate);
+    shmem_reduce_kernel<<<blocks, threads, threads * sizeof(int)>>>(d_out, d_intermediate, threads);
 }
 
 /* 
@@ -149,7 +149,6 @@ int main(void)
     cudaEventCreate(&start);
     cudaEventCreate(&stop);
     // launch the kernel
-	printf("Running reduce with shared mem\n");
     cudaEventRecord(start, 0);
     reduce(d_out, d_intermediate, d_in, array_size);
     cudaEventRecord(stop, 0);
