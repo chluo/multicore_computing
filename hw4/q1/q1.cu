@@ -37,19 +37,19 @@ __global__ void shmem_reduce_kernel(int * d_out, const int * d_in)
 /* 
 * Reduction-based algorithm to find the min value in (int * d_in) 
 */ 
-void reduce(float * d_out, float * d_intermediate, float * d_in, int size)
+void reduce(int * d_out, int * d_intermediate, int * d_in, int size)
 {
     // assumes that size is not greater than maxThreadsPerBlock^2
     // and that size is a multiple of maxThreadsPerBlock
     const int maxThreadsPerBlock = 512;
     int threads = maxThreadsPerBlock;
     int blocks = size / maxThreadsPerBlock;
-    shmem_reduce_kernel<<<blocks, threads, threads * sizeof(float)>>>(d_intermediate, d_in);
+    shmem_reduce_kernel<<<blocks, threads, threads * sizeof(int)>>>(d_intermediate, d_in);
 
     // now we're down to one block left, so reduce it
     threads = blocks; // launch one thread for each block in prev step
     blocks = 1;
-    shmem_reduce_kernel<<<blocks, threads, threads * sizeof(float)>>>(d_out, d_intermediate);
+    shmem_reduce_kernel<<<blocks, threads, threads * sizeof(int)>>>(d_out, d_intermediate);
 }
 
 /* 
