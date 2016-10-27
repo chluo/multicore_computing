@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <cuda_runtime.h>
 
+#define MAX_ARRAY_SIZE 1000000
+
 /* 
 * GPU kernel: reduction, getting the min value in a sub-array
 */ 
@@ -82,7 +84,7 @@ int * read_data(int * size)
         printf("!! Error in opening data file \n"); 
         exit(1); 
     }
-    int cur_array_size = 10000; 
+    int cur_array_size = MAX_ARRAY_SIZE; 
     int * buffer = (int *)malloc(cur_array_size * sizeof(int)); 
     
     int i = 0; 
@@ -91,12 +93,7 @@ int * read_data(int * size)
             printf("!! Error in importing data from file \n"); 
             exit(1); 
         }
-        ++i; 
-        if (i >= cur_array_size) {
-            cur_array_size *= 2; 
-            buffer = (int *)realloc((void *)buffer, cur_array_size); 
-        }
-        
+        ++i;         
     }
     
     *size = i; 
@@ -144,16 +141,6 @@ int main(void)
 
     // transfer the input array to the GPU
     cudaMemcpy(d_in, h_in, array_byte, cudaMemcpyHostToDevice);
-    // cudaDeviceSynchronize(); 
-    
-    int * h_tmp = (int *)malloc(array_byte); 
-    cudaMemcpy(h_tmp, d_in, array_byte, cudaMemcpyDeviceToHost);    
-    // cudaDeviceSynchronize(); 
-
-    
-    // For debug 
-    for (int i = 0; i < array_size; ++i) 
-        printf("%d\n", h_tmp[i]); 
 
     cudaEvent_t start, stop;
     cudaEventCreate(&start);
