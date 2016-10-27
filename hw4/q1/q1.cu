@@ -94,7 +94,7 @@ int * read_data(int * size)
 		++i; 
 		if (i >= cur_array_size) {
 			cur_array_size *= 2; 
-			buffer = realloc(buffer, cur_array_size); 
+			buffer = (int *)realloc(buffer, cur_array_size); 
 		}
 		
 	}
