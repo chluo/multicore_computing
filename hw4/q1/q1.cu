@@ -92,10 +92,10 @@ int * read_data(int * size)
             exit(1); 
         }
         ++i; 
-        // if (i >= cur_array_size) {
-            // cur_array_size *= 2; 
-            // buffer = (int *)realloc(buffer, cur_array_size); 
-        // }
+        if (i >= cur_array_size) {
+            cur_array_size *= 2; 
+            buffer = (int *)realloc((void *)buffer, cur_array_size); 
+        }
         
     }
     
