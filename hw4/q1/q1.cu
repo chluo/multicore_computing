@@ -92,10 +92,10 @@ int * read_data(int * size)
             exit(1); 
         }
         ++i; 
-        if (i >= cur_array_size) {
-            cur_array_size *= 2; 
-            buffer = (int *)realloc(buffer, cur_array_size); 
-        }
+        // if (i >= cur_array_size) {
+            // cur_array_size *= 2; 
+            // buffer = (int *)realloc(buffer, cur_array_size); 
+        // }
         
     }
     
@@ -143,12 +143,12 @@ int main(void)
     cudaMalloc((void **) &d_out, sizeof(int));
 
     // transfer the input array to the GPU
-    cudaMemcpy(d_in, (void *)h_in, array_byte, cudaMemcpyHostToDevice);
-    cudaDeviceSynchronize(); 
+    cudaMemcpy(d_in, h_in, array_byte, cudaMemcpyHostToDevice);
+    // cudaDeviceSynchronize(); 
     
     int * h_tmp = (int *)malloc(array_byte); 
-    cudaMemcpy((void *)h_tmp, d_in, array_byte, cudaMemcpyDeviceToHost);    
-    cudaDeviceSynchronize(); 
+    cudaMemcpy(h_tmp, d_in, array_byte, cudaMemcpyDeviceToHost);    
+    // cudaDeviceSynchronize(); 
 
     
     // For debug 
