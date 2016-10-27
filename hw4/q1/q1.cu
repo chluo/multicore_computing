@@ -22,7 +22,8 @@ __global__ void shmem_reduce_kernel(int * d_out, const int * d_in, const int siz
     {
         if (tid < s && myId < size && (myId + s) < size)
         {
-            sdata[tid] = (sdata[tid] < sdata[tid + s]) ? sdata[tid] : sdata[tid + s];
+			if (sdata[tid] > sdata[tid + s])
+				sdata[tid] = sdata[tid + s]; 
         }
         __syncthreads();        // make sure all adds at one stage are done!
     }
@@ -40,10 +41,9 @@ __global__ void shmem_reduce_kernel(int * d_out, const int * d_in, const int siz
 void reduce(int * d_out, int * d_intermediate, int * d_in, int size)
 {
     // assumes that size is not greater than maxThreadsPerBlock^2
-    // and that size is a multiple of maxThreadsPerBlock
     const int maxThreadsPerBlock = 512;
     int threads = maxThreadsPerBlock;
-    int blocks = size / maxThreadsPerBlock;
+    int blocks = (size + maxThreadsPerBlock - 1) / maxThreadsPerBlock;
     shmem_reduce_kernel<<<blocks, threads, threads * sizeof(int)>>>(d_intermediate, d_in, size);
 
     // now we're down to one block left, so reduce it
@@ -130,6 +130,10 @@ int main(void)
 	int array_byte = array_size * sizeof(int);
     printf(">> Number of data read in: %d\n", array_size); 
 	
+	// For debug 
+	for (int i = 0; i < array_size; ++i) 
+		printf("%d\n", h_in[i]); 
+	
 	/* 
 	* Part a 
 	*/ 
@@ -160,7 +164,7 @@ int main(void)
 	int h_out; 
     cudaMemcpy(&h_out, d_out, sizeof(int), cudaMemcpyDeviceToHost);
 
-    printf(">> Average time elapsed of part a: %f\n", elapsedTime);
+    printf(">> Average time elapsed in part a: %f\n", elapsedTime);
     printf(">> Min value returned by device: %d\n", h_out);
 
     // free GPU memory allocation
