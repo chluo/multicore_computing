@@ -129,6 +129,7 @@ int main(void)
 	int * h_in = read_data(&array_size); 
 	int array_byte = array_size * sizeof(int);
     printf(">> Number of data read in: %d\n", array_size); 
+	printf(">> Total input array size: %d Byte\n", array_size); 
 	
 	/* 
 	* Part a 
