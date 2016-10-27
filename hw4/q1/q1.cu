@@ -108,7 +108,7 @@ int main(void)
     int deviceCount;
     cudaGetDeviceCount(&deviceCount);
     if (deviceCount == 0) {
-        fprintf(stderr, "!! Error: no devices supporting CUDA.\n");
+        printf("!! Error: no devices supporting CUDA.\n");
         exit(EXIT_FAILURE);
     }
     int dev = 0;
@@ -174,6 +174,7 @@ int main(void)
 	* Part b
 	*/ 
 	
+	/* 
 	d_out = d_intermediate; 
 	int numThreadPerBlock = 512; 
 	int numBlock = array_size / numThreadPerBlock; 
@@ -188,7 +189,7 @@ int main(void)
 	
 	// copy back the result array from GPU
 	int * h_out_array = (int *)malloc(array_size * sizeof(int)); 
-	cudaMemcpy(&h_out_array, d_out, sizeof(int), cudaMemcpyDeviceToHost); 
+	cudaMemcpy(&h_out_array, d_out, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
 	
 	// output the result array into file 
 	FILE * fptr = fopen("./out.txt", "w"); 
@@ -210,6 +211,7 @@ int main(void)
 	// Free GPU memory allocation 
 	cudaFree(d_in); 
 	cudaFree(d_intermediate); 
+	*/ 
 
     return 0;
 }
