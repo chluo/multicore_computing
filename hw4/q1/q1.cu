@@ -145,7 +145,7 @@ int main(void)
     // transfer the input array to the GPU
     cudaMemcpy(d_in, h_in, array_byte, cudaMemcpyHostToDevice);
 	
-	cudaMemcpy(d_in, h_in, array_byte, cudaMemcpyDeviceToHost); 
+	cudaMemcpy(h_in, d_in, array_byte, cudaMemcpyDeviceToHost); 
 	
 	// For debug 
 	for (int i = 0; i < array_size; ++i) 
