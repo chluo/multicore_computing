@@ -240,6 +240,8 @@ __global__ void shmem_counter_kernel(int * array_i, int * cnt_matrix, int array_
     if (threadIdx.x < 10) {
         cnt_matrix[threadIdx.x * blockDim.x + blockIdx.x] = scnt[threadIdx.x]; 
     }
+     
+    printf("%d\n", scnt[threadIdx.x]); 
 }
 
 /* 
@@ -335,6 +337,8 @@ int main(void) {
 
     
     // part b ------------------------------------------------------------ 
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
     cudaEventRecord(start, 0);
     int * array_o_b = shmem_counter(array_i, array_size); 
     cudaEventRecord(stop, 0);
