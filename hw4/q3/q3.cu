@@ -192,7 +192,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
 	int * array_o = (int *)malloc((*num_odd) * sizeof(int)); 
 	
 	// copy the result from GPU to CPU
-	cudaMemcpy(array_o, array_device_out, (*num_odd) * sizeof(int), cudaMemcpyDeviceToHost); 
+	// cudaMemcpy(array_o, array_device_out, (*num_odd) * sizeof(int), cudaMemcpyDeviceToHost); 
 	
 	// finish 
 	cudaFree(array_device); 
