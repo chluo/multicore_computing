@@ -165,7 +165,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
 	// copy the input array into GPU shared memory 
 	int * array_device; 
 	cudaMalloc((void **) &array_device, array_size * sizeof(int)); 
-	cudaMemcpy(array_device, array_i, array_size * sizeof(int), cudaMemcpyHostToDevice); 
+	// cudaMemcpy(array_device, array_i, array_size * sizeof(int), cudaMemcpyHostToDevice); 
 	
 	// allocate GPU memories for array_is_odd and array_index 
 	int * array_is_odd, * array_index; 
