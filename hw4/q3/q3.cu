@@ -218,7 +218,7 @@ int main(void) {
 	// int * array_o = compact(array_i, &num_odd, array_size); 
 	
 	// print to file 
-	print_file(array_o, num_odd); 
+	// print_file(array_o, num_odd); 
 	
 	// print debug information to stdout 
 	printf(">> Number of odd numbers found: %d\n", num_odd); 
