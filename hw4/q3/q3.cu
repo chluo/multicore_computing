@@ -173,7 +173,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
 	cudaMalloc((void **) &array_index, array_size * sizeof(int)); 
 	
 	// compute array_is_odd 
-	odd_check<<<blocks, threads>>>(array_device, array_is_odd, array_size); 
+	// odd_check<<<blocks, threads>>>(array_device, array_is_odd, array_size); 
 	
 	// compute array_index by prefix scan 
 	// prefix_scan<<<blocks, threads, threads * sizeof(int)>>>(array_is_odd, array_index, array_size); 
@@ -186,7 +186,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
 	cudaMalloc((void **) &array_device_out, (*num_odd) * sizeof(int)); 
 	
 	// compute the result
-	get_odd<<<blocks, threads>>>(array_device, array_device_out, array_is_odd, array_index, array_size, *num_odd); 
+	// get_odd<<<blocks, threads>>>(array_device, array_device_out, array_is_odd, array_index, array_size, *num_odd); 
 	
 	// allocate CPU memory for the result array 
 	int * array_o = (int *)malloc((*num_odd) * sizeof(int)); 
