@@ -219,10 +219,14 @@ int * global_counter(int * array_i, int array_size) {
 * cnt_matrix dimensions: 10 x (# of blocks) 
 */ 
 __global__ void shmem_counter_kernel(int * array_i, int * cnt_matrix, int array_size) {
-    // shared counter within block, initially all 0 
+    // shared counter within block
     // size: 11 * sizeof(int) 
     // one extra int for numbers greater than 1000 
     extern __shared__ int scnt[]; 
+    
+    // initialize to 0 
+    snct[threadIdx.x] = 0; 
+    __syncthreads();
     
     // block-local counter 
     int myId = threadIdx.x + blockDim.x * blockIdx.x; 
