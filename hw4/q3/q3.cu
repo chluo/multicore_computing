@@ -124,7 +124,7 @@ __global__ void prefix_scan(int * array_i, int * array_o, int array_size) {
     int thId = threadIdx.x;
 	
 	// load initial values into shared memory 
-	sdata[thId] = array_in[myId]; 
+	sdata[thId] = array_i[myId]; 
 	__syncthreads(); 
 	
 	// do scan in shared memory 
