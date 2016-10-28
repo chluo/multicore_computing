@@ -225,6 +225,6 @@ int main(void) {
 	
 	// finish 
 	// free(array_i); 
-	free(array_o); 
+	// free(array_o); 
 	return 0; 
 }
