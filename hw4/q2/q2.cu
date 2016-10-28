@@ -9,7 +9,7 @@
 * Check GPU device 
 */ 
 void check_dev(void) {
-	int deviceCount;
+    int deviceCount;
     cudaGetDeviceCount(&deviceCount);
     if (deviceCount == 0) {
         printf("!! Error: no devices supporting CUDA.\n");
@@ -23,13 +23,13 @@ void check_dev(void) {
 * Calculate the number of threads per block based on array size 
 */ 
 int calc_num_thread(int size) {
-	int approx = (int)sqrt((double)size); 
-	// find the nearest power of 2 
-	int pow2 = 1; 
-	while (pow2 < approx) {
-		pow2 <<= 1; 
-	}
-	return pow2; 
+    int approx = (int)sqrt((double)size); 
+    // find the nearest power of 2 
+    int pow2 = 1; 
+    while (pow2 < approx) {
+        pow2 <<= 1; 
+    }
+    return pow2; 
 }
 
 /* 
@@ -56,7 +56,7 @@ int * read_data(int * size)
         ++i;         
     }
     
-	fclose(fptr); 
+    fclose(fptr); 
     *size = i; 
     return buffer; 
 }
@@ -64,8 +64,8 @@ int * read_data(int * size)
 /* 
 * Outputs the result array into file 
 */ 
-void print_file(int * array, int array_size, char fname[]) {
-	FILE * fptr_b = fopen(fname, "w"); 
+void print_file(int * array, int array_size, const char fname[]) {
+    FILE * fptr_b = fopen(fname, "w"); 
     if (!fptr_b) {
         printf("!! Error in opening output file \n"); 
         exit(1);
@@ -82,26 +82,26 @@ void print_file(int * array, int array_size, char fname[]) {
 * GPU kernel: inclusive prefix scan, one step 
 */ 
 __global__ void prefix_scan_step(int * array_io, int array_size, int dist) {
-	// shared memory to store intermediate results 
-	extern __shared__ int sdata[]; 
-	
-	int myId = threadIdx.x + blockDim.x * blockIdx.x;
-	int thId = threadIdx.x; 
-	
-	// load initial values to shared memory 
-	sdata[thId] = array_io[myId]; 
-	__syncthreads(); 
-	
-	// store block results in shared memory 
-	if (!(myId < dist) && myId < array_size) {
-		sdata[thId] += array_io[myId - dist]; 
-	}
-	__syncthreads();  
-	// copy results to global memory 
-	if (myId < array_size) {
-		array_io[myId] = sdata[thId]; 
-	}
-	__syncthreads(); 
+    // shared memory to store intermediate results 
+    extern __shared__ int sdata[]; 
+    
+    int myId = threadIdx.x + blockDim.x * blockIdx.x;
+    int thId = threadIdx.x; 
+    
+    // load initial values to shared memory 
+    sdata[thId] = array_io[myId]; 
+    __syncthreads(); 
+    
+    // store block results in shared memory 
+    if (!(myId < dist) && myId < array_size) {
+        sdata[thId] += array_io[myId - dist]; 
+    }
+    __syncthreads();  
+    // copy results to global memory 
+    if (myId < array_size) {
+        array_io[myId] = sdata[thId]; 
+    }
+    __syncthreads(); 
 
 }
 
@@ -109,17 +109,17 @@ __global__ void prefix_scan_step(int * array_io, int array_size, int dist) {
 * Inclusive prefix scan
 */ 
 void prefix_scan(int * array_io, int array_size) {
-	// dynamically calculate the number of threads and blocks 
-	const int maxThreadsPerBlock = calc_num_thread(array_size);
+    // dynamically calculate the number of threads and blocks 
+    const int maxThreadsPerBlock = calc_num_thread(array_size);
     int threads = maxThreadsPerBlock;
     int blocks = (array_size + maxThreadsPerBlock - 1) / maxThreadsPerBlock;
-	
-	int dist = 1; 
-	while (dist < array_size) {
-		prefix_scan_step<<<blocks, threads, threads * sizeof(int)>>>(array_io, array_size, dist); 
-		cudaThreadSynchronize(); 
-		dist *= 2; 
-	}
+    
+    int dist = 1; 
+    while (dist < array_size) {
+        prefix_scan_step<<<blocks, threads, threads * sizeof(int)>>>(array_io, array_size, dist); 
+        cudaThreadSynchronize(); 
+        dist *= 2; 
+    }
 }
 
 /* 
@@ -142,7 +142,7 @@ __global__ void shmem_reduce_kernel(int * d_out, const int * d_in, const int siz
     {
         if (tid < s && myId < size && (myId + s) < size)
         {
-			sdata[tid] += sdata[tid + s]; 
+            sdata[tid] += sdata[tid + s]; 
         }
         __syncthreads();        // make sure all adds at one stage are done!
     }
@@ -175,75 +175,75 @@ void reduce(int * d_out, int * d_intermediate, int * d_in, int size)
 * GPU kernel for part a
 */ 
 __global__ void global_counter_kernel(int * array_i, int * cnt_o, int array_size) {
-	myId = threadIdx.x + blockDim.x * blockIdx.x; 
-	if (myId < array_size) {
-		atomicAdd(&cnt_o[array_i[myId] / 100], 1); 
-	}
+    int myId = threadIdx.x + blockDim.x * blockIdx.x; 
+    if (myId < array_size) {
+        atomicAdd(&cnt_o[array_i[myId] / 100], 1); 
+    }
 }
 
 /* 
 * part a 
 */ 
 int * global_counter(int * array_i, int array_size) {
-	// dynamically calculate the number of threads and blocks 
-	const int maxThreadsPerBlock = calc_num_thread(array_size);
+    // dynamically calculate the number of threads and blocks 
+    const int maxThreadsPerBlock = calc_num_thread(array_size);
     int threads = maxThreadsPerBlock;
     int blocks = (array_size + maxThreadsPerBlock - 1) / maxThreadsPerBlock;
-	
-	// allocate GPU global memories for input & output arrays 
-	int * array_device, * array_device_out; 
-	cudaMalloc((void **) &array_device, array_size * sizeof(int)); 
-	cudaMalloc((void **) &array_device_out, 11 * sizeof(int)); 
-	
-	// copy the input array into GPU shared memory 
-	cudaMemcpy(array_device, array_i, array_size * sizeof(int), cudaMemcpyHostToDevice); 
-	
-	// launch the kernel 
-	global_counter_kernel<<<blocks, threads>>>(array_device, array_device_out, array_size); 
-	
-	// allocate CPU memory for output array 
-	int * array_o = (int *)malloc(10 * sizeof(int)); 
-	
-	// copy result back to CPU 
-	cudaMemcpy(array_o, array_device_out, 10 * sizeof(int), cudaMemcpyDeviceToHost); 
-	
-	// finish 
-	cudaFree(array_device); 
-	cudaFree(array_device_out); 
-	return array_o; 
+    
+    // allocate GPU global memories for input & output arrays 
+    int * array_device, * array_device_out; 
+    cudaMalloc((void **) &array_device, array_size * sizeof(int)); 
+    cudaMalloc((void **) &array_device_out, 11 * sizeof(int)); 
+    
+    // copy the input array into GPU shared memory 
+    cudaMemcpy(array_device, array_i, array_size * sizeof(int), cudaMemcpyHostToDevice); 
+    
+    // launch the kernel 
+    global_counter_kernel<<<blocks, threads>>>(array_device, array_device_out, array_size); 
+    
+    // allocate CPU memory for output array 
+    int * array_o = (int *)malloc(10 * sizeof(int)); 
+    
+    // copy result back to CPU 
+    cudaMemcpy(array_o, array_device_out, 10 * sizeof(int), cudaMemcpyDeviceToHost); 
+    
+    // finish 
+    cudaFree(array_device); 
+    cudaFree(array_device_out); 
+    return array_o; 
 }
 
 /* 
 * CPU main routine 
 */ 
 int main(void) {
-	// check device 
-	check_dev(); 
+    // check device 
+    check_dev(); 
     
     // data array on host 
     int array_size = 0; 
     int * array_i = read_data(&array_size); 
-	
-	// part a ------------------------------------------------------------ 
-	// compute counter values 
-	cudaEvent_t start, stop;
-	cudaEventCreate(&start);
-	cudaEventCreate(&stop);
-	cudaEventRecord(start, 0);
-	int * array_o = global_counter(array_i, array_size); 
-	cudaEventRecord(stop, 0);
-	cudaEventSynchronize(stop);
-	float elapsedTime;
-	cudaEventElapsedTime(&elapsedTime, start, stop);
-	
-	// print to file 
-	print_file(array_o, 10, "./q2a.txt"); 
-	
-	// print debug information to stdout 
-	printf(">> Average time elapsed in part a: %f\n", elapsedTime);
-	
-	// part b ------------------------------------------------------------ 
+    
+    // part a ------------------------------------------------------------ 
+    // compute counter values 
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+    cudaEventRecord(start, 0);
+    int * array_o = global_counter(array_i, array_size); 
+    cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
+    float elapsedTime;
+    cudaEventElapsedTime(&elapsedTime, start, stop);
+    
+    // print to file 
+    print_file(array_o, 10, "./q2a.txt"); 
+    
+    // print debug information to stdout 
+    printf(">> Average time elapsed in part a: %f\n", elapsedTime);
+    
+    // part b ------------------------------------------------------------ 
 
-	
-	return 0; 
+    
+    return 0; 
 }
