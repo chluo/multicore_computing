@@ -179,7 +179,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
 	// debug 
 	int * array_is_odd_host = (int *)malloc(array_size * sizeof(int)); 
 	cudaMemcpy(array_is_odd_host, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
-	print_file(array_is_odd_host); 
+	print_file(array_is_odd_host, array_size); 
 	
 	// compute array_index by prefix scan 
 	prefix_scan<<<blocks, threads, threads * sizeof(int)>>>(array_is_odd, array_index, array_size); 
