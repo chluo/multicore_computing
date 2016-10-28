@@ -123,6 +123,10 @@ __global__ void prefix_scan(int * array_i, int * array_o, int array_size) {
 	int myId = threadIdx.x + blockDim.x * blockIdx.x;
     int thId = threadIdx.x;
 	
+	// load initial values into shared memory 
+	sdata[thId] = array_in[myId]; 
+	__syncthreads(); 
+	
 	// do scan in shared memory 
 	int dist = 1; 
 	while (dist < array_size) {
