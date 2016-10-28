@@ -178,7 +178,7 @@ int main(void)
     */ 
     
     d_out = d_intermediate; 
-    int numThreadPerBlock = calc_num_thread(size); 
+    int numThreadPerBlock = calc_num_thread(array_size); 
     int numBlock = (array_size + numThreadPerBlock - 1) / numThreadPerBlock; 
     
     // launch the kernel
