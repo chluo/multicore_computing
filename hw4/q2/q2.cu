@@ -239,7 +239,7 @@ __global__ void shmem_counter_kernel(int * array_i, int * cnt_matrix, int array_
     // only have 10 values 
     if (threadIdx.x < 10) {
         cnt_matrix[threadIdx.x * blockDim.x + blockIdx.x] = scnt[threadIdx.x]; 
-        printf("%d\n", scnt[threadIdx.x]); 
+        printf("%d\n", cnt_matrix[threadIdx.x * blockDim.x + blockIdx.x]); 
     }
 }
 
