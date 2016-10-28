@@ -211,11 +211,11 @@ int main(void) {
     
     // data array on host 
     int array_size = 0; 
-    int * array_i = read_data(&array_size); 
+    // int * array_i = read_data(&array_size); 
 	
 	// do compact 
 	int num_odd = 0; 
-	int * array_o = compact(array_i, &num_odd, array_size); 
+	// int * array_o = compact(array_i, &num_odd, array_size); 
 	
 	// print to file 
 	print_file(array_o, num_odd); 
@@ -224,7 +224,7 @@ int main(void) {
 	printf(">> Number of odd numbers found: %d\n", num_odd); 
 	
 	// finish 
-	free(array_i); 
+	// free(array_i); 
 	free(array_o); 
 	return 0; 
 }
