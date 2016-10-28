@@ -6,7 +6,7 @@
 #define MAX_ARRAY_SIZE 1000000
 
 /* 
-* GPU kernel: reduction, getting the min value in a sub-array
+* GPU kernel for part a: reduction, getting the min value in a sub-array
 */ 
 __global__ void shmem_reduce_kernel(int * d_out, const int * d_in, const int size)
 {
@@ -38,13 +38,26 @@ __global__ void shmem_reduce_kernel(int * d_out, const int * d_in, const int siz
     }
 }
 
+/*
+* Calculate the number of threads per block based on array size 
+*/ 
+int calc_num_thread(int size) {
+	int approx = (int)sqrt((double)size); 
+	// find the nearest power of 2 
+	int pow2 = 1; 
+	while (pow2 < approx) {
+		pow2 <<= 1; 
+	}
+	return pow2; 
+}
+
 /* 
 * Reduction-based algorithm to find the min value in (int * d_in) 
 */ 
 void reduce(int * d_out, int * d_intermediate, int * d_in, int size)
 {
     // assumes that size is not greater than maxThreadsPerBlock^2
-    const int maxThreadsPerBlock = (int)sqrt((double)size);
+    const int maxThreadsPerBlock = calc_num_thread(size);
     int threads = maxThreadsPerBlock;
     int blocks = (size + maxThreadsPerBlock - 1) / maxThreadsPerBlock;
     shmem_reduce_kernel<<<blocks, threads, threads * sizeof(int)>>>(d_intermediate, d_in, size);
@@ -56,7 +69,7 @@ void reduce(int * d_out, int * d_intermediate, int * d_in, int size)
 }
 
 /* 
-* GPU kernel: calculate the last digit of each element in the input array in parallel
+* GPU kernel for part b: calculate the last digit of each element in the input array in parallel
 */ 
 __global__ void last_digit_kernel(int * d_out, const int * d_in, const int size) 
 {
@@ -165,7 +178,7 @@ int main(void)
     */ 
     
     d_out = d_intermediate; 
-    int numThreadPerBlock = (int)sqrt((double)array_size); 
+    int numThreadPerBlock = calc_num_thread(size); 
     int numBlock = (array_size + numThreadPerBlock - 1) / numThreadPerBlock; 
     
     // launch the kernel
@@ -181,7 +194,7 @@ int main(void)
     cudaMemcpy(h_out_array, d_out, array_byte, cudaMemcpyDeviceToHost); 
     
     // output the result array into file 
-    FILE * fptr_b = fopen("./out.txt", "w"); 
+    FILE * fptr_b = fopen("./q1b.txt", "w"); 
     if (!fptr_b) {
         printf("!! Error in opening output file \n"); 
         exit(1);
