@@ -176,7 +176,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
 	odd_check<<<blocks, threads>>>(array_device, array_is_odd, array_size); 
 	
 	// compute array_index by prefix scan 
-	prefix_scan<<<blocks, threads, threads * sizeof(int)>>>(array_is_odd, array_index, array_size); 
+	// prefix_scan<<<blocks, threads, threads * sizeof(int)>>>(array_is_odd, array_index, array_size); 
 	
 	// get the number of odd numbers 
 	*num_odd = array_index[array_size - 1]; 
