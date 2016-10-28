@@ -62,7 +62,7 @@ __global__ void last_digit_kernel(int * d_out, const int * d_in, const int size)
     int myId = threadIdx.x + blockDim.x * blockIdx.x;
     
 	if (myId < size)
-		d_out[myId] = d_in[myId] % 10; 
+		d_out[myId] = sdata[tid] % 10; 
 }
 
 /* 
@@ -169,15 +169,15 @@ int main(void)
     
     // launch the kernel
     cudaEventRecord(start, 0); 
-    last_digit_kernel<<<numBlock, numThreadPerBlock, numThreadPerBlock * sizeof(int)>>>(d_out, d_in, array_size); 
+    last_digit_kernel<<<numBlock, numThreadPerBlock>>>(d_out, d_in, array_size); 
     cudaEventRecord(stop, 0);
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&elapsedTime, start, stop);
     printf(">> Average time elapsed of part b: %f\n", elapsedTime);
     
     // copy back the result array from GPU
-    int * h_out_array = (int *)malloc(array_size * sizeof(int)); 
-    cudaMemcpy(&h_out_array, d_out, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
+    int * h_out_array = (int *)malloc(array_byte); 
+    cudaMemcpy(h_out_array, d_out, array_byte, cudaMemcpyDeviceToHost); 
     
     // output the result array into file 
     FILE * fptr = fopen("./out.txt", "w"); 
