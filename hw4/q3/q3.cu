@@ -118,14 +118,14 @@ __global__ void odd_check(int * array_i, int * array_o, int array_size) {
 */ 
 __global__ void prefix_scan(int * array_i, int * array_o, int array_size) {
 	// shared memory for intermediate results
-	extern __shared__ sdata[]; 
+	extern __shared__ int sdata[]; 
 	
 	int myId = threadIdx.x + blockDim.x * blockIdx.x;
     int thId = threadIdx.x;
 	
 	// do scan in shared memory 
 	int dist = 1; 
-	while (dist < size) {
+	while (dist < array_size) {
 		if (!(myId < dist) && myId < array_size) {
 			sdata[thId] += array_i[myId - dist]; 
 		}
@@ -135,7 +135,7 @@ __global__ void prefix_scan(int * array_i, int * array_o, int array_size) {
 	
 	// copy the result to the output array 
 	if (myId < array_size) {
-		array_o[myId] = sdata[tid]; 
+		array_o[myId] = sdata[thId]; 
 	}
 }
 
@@ -160,7 +160,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
 	// dynamically calculate the number of threads and blocks 
 	const int maxThreadsPerBlock = calc_num_thread(array_size);
     int threads = maxThreadsPerBlock;
-    int blocks = (size + maxThreadsPerBlock - 1) / maxThreadsPerBlock;
+    int blocks = (array_size + maxThreadsPerBlock - 1) / maxThreadsPerBlock;
 	
 	// copy the input array into GPU shared memory 
 	int * array_device; 
