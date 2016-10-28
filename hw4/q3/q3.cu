@@ -253,8 +253,8 @@ int main(void) {
 	print_file(array_o, num_odd); 
 	
 	// print debug information to stdout 
-	printf(">> Number of odd numbers found: %d\n", num_odd); 
-	printf(">> Average time elapsed: %f\n", elapsedTime);
+	// printf(">> Number of odd numbers found: %d\n", num_odd); 
+	// printf(">> Average time elapsed: %f\n", elapsedTime);
 	
 	// finish 
 	free(array_i); 
