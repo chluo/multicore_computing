@@ -218,7 +218,7 @@ int * global_counter(int * array_i, int array_size) {
 * GPU kernel for part b 
 * cnt_matrix dimensions: 10 x (# of blocks) 
 */ 
-__global__ void shmem_counter_kernel(int * array_i, int * cnt_matrix, int array_size) {
+__global__ void shmem_counter_kernel(int * array_i, int * cnt_matrix, int array_size, int num_block) {
     // shared counter within block
     // size: 11 * sizeof(int) 
     // one extra int for numbers greater than 1000 
@@ -238,7 +238,7 @@ __global__ void shmem_counter_kernel(int * array_i, int * cnt_matrix, int array_
     // copy the counter values to shared memory 
     // only have 10 values 
     if (threadIdx.x < 10) {
-        cnt_matrix[threadIdx.x * blockDim.x + blockIdx.x] = scnt[threadIdx.x]; 
+        cnt_matrix[threadIdx.x * num_block + blockIdx.x] = scnt[threadIdx.x]; 
     }
 }
 
@@ -284,7 +284,7 @@ int * shmem_counter(int * array_i, int array_size) {
     // launch the counter kernel 
     // shared memory size: 11 * sizeof(int) 
     // one extra int for numbers greater than 1000 
-    shmem_counter_kernel<<<blocks, threads, 11 * sizeof(int)>>>(array_device, array_device_inter, array_size); 
+    shmem_counter_kernel<<<blocks, threads, 11 * sizeof(int)>>>(array_device, array_device_inter, array_size, blocks); 
     cudaThreadSynchronize(); 
     
     // debug
@@ -340,13 +340,14 @@ int main(void) {
 
     
     // part b ------------------------------------------------------------ 
-    cudaEventCreate(&start);
-    cudaEventCreate(&stop);
-    cudaEventRecord(start, 0);
+    cudaEvent_t start_b, stop_b;
+    cudaEventCreate(&start_b);
+    cudaEventCreate(&stop_b);
+    cudaEventRecord(start_b, 0);
     int * array_o_b = shmem_counter(array_i, array_size); 
-    cudaEventRecord(stop, 0);
-    cudaEventSynchronize(stop);
-    cudaEventElapsedTime(&elapsedTime, start, stop);
+    cudaEventRecord(stop_b, 0);
+    cudaEventSynchronize(stop_b);
+    cudaEventElapsedTime(&elapsedTime, start_b, stop_b);
         
     // print to file 
     print_file(array_o_b, 10, "./q2b.txt"); 
