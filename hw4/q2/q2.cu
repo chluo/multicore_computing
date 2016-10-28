@@ -330,7 +330,7 @@ int main(void) {
     
     // part b ------------------------------------------------------------ 
     cudaEventRecord(start, 0);
-    array_o = global_counter(array_i, array_size); 
+    array_o = shmem_counter(array_i, array_size); 
     cudaEventRecord(stop, 0);
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&elapsedTime, start, stop);
