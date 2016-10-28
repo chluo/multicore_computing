@@ -328,6 +328,9 @@ int main(void) {
     // print debug information to stdout 
     printf(">> Average time elapsed in part a: %f\n", elapsedTime);
     
+    // finish part a 
+    free(array_o); 
+    
     // part b ------------------------------------------------------------ 
     cudaEventRecord(start, 0);
     array_o = shmem_counter(array_i, array_size); 
