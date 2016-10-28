@@ -179,7 +179,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
 	// prefix_scan<<<blocks, threads, threads * sizeof(int)>>>(array_is_odd, array_index, array_size); 
 	
 	// get the number of odd numbers 
-	// *num_odd = array_index[array_size - 1]; 
+	cudaMemcpy(num_odd, &array_index[array_size - 1], cudaMemcpyDeviceToHost); 
 	
 	// allocate GPU memory for the result array 
 	int * array_device_out; 
