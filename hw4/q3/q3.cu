@@ -175,6 +175,11 @@ int * compact(int * array_i, int * num_odd, int array_size) {
 	prefix_scan<<<blocks, threads>>>(array_index, array_size); 
 	cudaThreadSynchronize(); 
 	
+	// debug 
+	int * array_index_host = (int *)malloc(array_size * sizeof(int)); 
+	cudaMemcpy(array_index_host, array_index, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
+	print_file(array_index_host, array_size); 
+	
 	// get the number of odd numbers 
 	cudaMemcpy(num_odd, &array_index[array_size - 1], sizeof(int), cudaMemcpyDeviceToHost); 
 	
@@ -224,7 +229,7 @@ int main(void) {
     cudaEventElapsedTime(&elapsedTime, start, stop);
 	
 	// print to file 
-	print_file(array_o, num_odd); 
+	// print_file(array_o, num_odd); 
 	
 	// print debug information to stdout 
 	printf(">> Number of odd numbers found: %d\n", num_odd); 
