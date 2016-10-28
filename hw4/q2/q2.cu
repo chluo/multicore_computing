@@ -255,7 +255,7 @@ int * shmem_counter(int * array_i, int array_size) {
     // allocate GPU global memories for input & output arrays and intermediate counter matrix  
     int * array_device, * array_device_inter, * array_device_out; 
     cudaMalloc((void **) &array_device, array_size * sizeof(int)); 
-    cudaMalloc((void **) &array_device_inter, 10 * array_size * sizeof(int)); 
+    cudaMalloc((void **) &array_device_inter, 10 * blocks * sizeof(int)); 
     cudaMalloc((void **) &array_device_out, 10 * sizeof(int)); 
     
     /* --------------------------------------------------------------------------------
@@ -288,9 +288,9 @@ int * shmem_counter(int * array_i, int array_size) {
     cudaThreadSynchronize(); 
     
     // debug
-    int * debug = (int *)malloc(10 * array_size * sizeof(int)); 
+    int * debug = (int *)malloc(10 * blocks * sizeof(int)); 
     cudaMemcpy(debug, array_device_inter, 10 * array_size *sizeof(int), cudaMemcpyDeviceToHost); 
-    print_file(debug, 10 * array_size, "debug.txt"); 
+    print_file(debug, 10 * blocks, "debug.txt"); 
     
     // do reduction for each range 
     for (int i = 0; i < 10; ++i) {
