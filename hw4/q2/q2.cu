@@ -239,7 +239,6 @@ __global__ void shmem_counter_kernel(int * array_i, int * cnt_matrix, int array_
     // only have 10 values 
     if (threadIdx.x < 10) {
         cnt_matrix[threadIdx.x * blockDim.x + blockIdx.x] = scnt[threadIdx.x]; 
-        printf("%d\n", cnt_matrix[threadIdx.x * blockDim.x + blockIdx.x]); 
     }
 }
 
@@ -287,6 +286,11 @@ int * shmem_counter(int * array_i, int array_size) {
     // one extra int for numbers greater than 1000 
     shmem_counter_kernel<<<blocks, threads, 11 * sizeof(int)>>>(array_device, array_device_inter, array_size); 
     cudaThreadSynchronize(); 
+    
+    // debug
+    int * debug = (int *)malloc(10 * array_size * sizeof(int)); 
+    cudaMemcpy(debug, array_device_inter, 10 * array_size *sizeof(int), cudaMemcpyDeviceToHost); 
+    print_file(debug, 10 * array_size, "debug.txt"); 
     
     // do reduction for each range 
     for (int i = 0; i < 10; ++i) {
