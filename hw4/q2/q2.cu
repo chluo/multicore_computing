@@ -321,30 +321,28 @@ int main(void) {
     cudaEventCreate(&start);
     cudaEventCreate(&stop);
     cudaEventRecord(start, 0);
-    int * array_o = global_counter(array_i, array_size); 
+    int * array_o_a = global_counter(array_i, array_size); 
     cudaEventRecord(stop, 0);
     cudaEventSynchronize(stop);
     float elapsedTime;
     cudaEventElapsedTime(&elapsedTime, start, stop);
     
     // print to file 
-    print_file(array_o, 10, "./q2a.txt"); 
+    print_file(array_o_a, 10, "./q2a.txt"); 
     
     // print debug information to stdout 
     printf(">> Average time elapsed in part a: %f\n", elapsedTime);
-    
-    // finish part a 
-    free(array_o); 
+
     
     // part b ------------------------------------------------------------ 
     cudaEventRecord(start, 0);
-    array_o = shmem_counter(array_i, array_size); 
+    int * array_o_b = shmem_counter(array_i, array_size); 
     cudaEventRecord(stop, 0);
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&elapsedTime, start, stop);
         
     // print to file 
-    print_file(array_o, 10, "./q2b.txt"); 
+    print_file(array_o_b, 10, "./q2b.txt"); 
     
     // print debug information to stdout 
     printf(">> Average time elapsed in part b: %f\n", elapsedTime);
@@ -353,6 +351,7 @@ int main(void) {
     
     // finish 
     free(array_i); 
-    free(array_o); 
+    free(array_o_a); 
+    free(array_o_b); 
     return 0; 
 }
