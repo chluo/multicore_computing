@@ -165,7 +165,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
 	// copy the input array into GPU shared memory 
 	int * array_device; 
 	cudaMalloc((void **) &array_device, array_size * sizeof(int)); 
-	// cudaMemcpy(array_device, array_i, array_size * sizeof(int), cudaMemcpyHostToDevice); 
+	cudaMemcpy(array_device, array_i, array_size * sizeof(int), cudaMemcpyHostToDevice); 
 	
 	// allocate GPU memories for array_is_odd and array_index 
 	int * array_is_odd, * array_index; 
@@ -173,7 +173,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
 	cudaMalloc((void **) &array_index, array_size * sizeof(int)); 
 	
 	// compute array_is_odd 
-	// odd_check<<<blocks, threads>>>(array_device, array_is_odd, array_size); 
+	odd_check<<<blocks, threads>>>(array_device, array_is_odd, array_size); 
 	
 	// compute array_index by prefix scan 
 	// prefix_scan<<<blocks, threads, threads * sizeof(int)>>>(array_is_odd, array_index, array_size); 
@@ -218,13 +218,13 @@ int main(void) {
 	int * array_o = compact(array_i, &num_odd, array_size); 
 	
 	// print to file 
-	// print_file(array_o, num_odd); 
+	print_file(array_o, num_odd); 
 	
 	// print debug information to stdout 
 	printf(">> Number of odd numbers found: %d\n", num_odd); 
 	
 	// finish 
 	free(array_i); 
-	// free(array_o); 
+	free(array_o); 
 	return 0; 
 }
