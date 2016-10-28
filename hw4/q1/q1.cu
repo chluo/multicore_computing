@@ -89,6 +89,7 @@ int * read_data(int * size)
         ++i;         
     }
     
+	fclose(fptr); 
     *size = i; 
     return buffer; 
 }
@@ -104,21 +105,21 @@ int main(void)
     int dev = 0;
     cudaSetDevice(dev);
 
-    cudaDeviceProp devProps;
-    if (cudaGetDeviceProperties(&devProps, dev) == 0)
-    {
-        printf("Using device %d:\n", dev);
-        printf("%s; global mem: %dB; compute v%d.%d; clock: %d kHz\n",
-               devProps.name, (int)devProps.totalGlobalMem,
-               (int)devProps.major, (int)devProps.minor,
-               (int)devProps.clockRate);
-    }
+    // cudaDeviceProp devProps;
+    // if (cudaGetDeviceProperties(&devProps, dev) == 0)
+    // {
+        // printf("Using device %d:\n", dev);
+        // printf("%s; global mem: %dB; compute v%d.%d; clock: %d kHz\n",
+               // devProps.name, (int)devProps.totalGlobalMem,
+               // (int)devProps.major, (int)devProps.minor,
+               // (int)devProps.clockRate);
+    // }
     
     // data array on host 
     int array_size = 0; 
     int * h_in = read_data(&array_size); 
     int array_byte = array_size * sizeof(int);
-    printf(">> Number of data read in: %d\n", array_size); 
+    // printf(">> Number of data read in: %d\n", array_size); 
     
     /* 
     * Part a 
@@ -150,8 +151,17 @@ int main(void)
     int h_out; 
     cudaMemcpy(&h_out, d_out, sizeof(int), cudaMemcpyDeviceToHost);
 
-    printf(">> Average time elapsed in part a: %f\n", elapsedTime);
-    printf(">> Min value returned by device: %d\n", h_out);
+    // printf(">> Average time elapsed in part a: %f\n", elapsedTime);
+    // printf(">> Min value returned by device: %d\n", h_out);
+	
+	// output the result into file 
+    FILE * fptr_a = fopen("./q1.txt", "w"); 
+    if (!fptr_a) {
+        printf("!! Error in opening output file \n"); 
+        exit(1);
+    }
+	fprintf(fptr_a, "%d", h_out); 
+	fclose(fptr_a); 
 
     // free GPU memory allocation
     // Reuse d_in for the input array of part b
@@ -173,24 +183,24 @@ int main(void)
     cudaEventRecord(stop, 0);
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&elapsedTime, start, stop);
-    printf(">> Average time elapsed of part b: %f\n", elapsedTime);
+    // printf(">> Average time elapsed of part b: %f\n", elapsedTime);
     
     // copy back the result array from GPU
     int * h_out_array = (int *)malloc(array_byte); 
     cudaMemcpy(h_out_array, d_out, array_byte, cudaMemcpyDeviceToHost); 
     
     // output the result array into file 
-    FILE * fptr = fopen("./out.txt", "w"); 
-    if (!fptr) {
+    FILE * fptr_b = fopen("./out.txt", "w"); 
+    if (!fptr_b) {
         printf("!! Error in opening output file \n"); 
         exit(1);
     }
     for (int i = 0; i < array_size; ++i) {
-        fprintf(fptr, "%d", h_out_array[i]); 
+        fprintf(fptr_b, "%d", h_out_array[i]); 
         if (i < array_size - 1) 
-            fprintf(fptr, ", "); 
+            fprintf(fptr_b, ", "); 
     }
-    fclose(fptr); 
+    fclose(fptr_b); 
     
     // Free CPU memory allocation 
     free(h_in); 
