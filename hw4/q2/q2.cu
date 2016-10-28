@@ -239,7 +239,6 @@ __global__ void shmem_counter_kernel(int * array_i, int * cnt_matrix, int array_
     // only have 10 values 
     if (threadIdx.x < 10) {
         cnt_matrix[threadIdx.x * blockDim.x + blockIdx.x] = scnt[threadIdx.x]; 
-        printf("%d, ", scnt[threadIdx.x]); 
     }
 }
 
@@ -292,6 +291,7 @@ int * shmem_counter(int * array_i, int array_size) {
     for (int i = 0; i < 10; ++i) {
         reduce(&array_device_out[i], array_device_reduction_inter, &array_device_inter[blocks * i], blocks); 
     }
+    cudaThreadSynchronize(); 
     
     // copy result back to CPU 
     cudaMemcpy(array_o, array_device_out, 10 * sizeof(int), cudaMemcpyDeviceToHost); 
