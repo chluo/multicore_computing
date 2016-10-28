@@ -174,11 +174,16 @@ int * compact(int * array_i, int * num_odd, int array_size) {
 	
 	// compute array_is_odd 
 	odd_check<<<blocks, threads>>>(array_device, array_is_odd, array_size); 
-	cudaDeviceSynchronize(); 
+	cudaThreadSynchronize(); 
+	
+	// debug 
+	int * array_is_odd_host = (int *)malloc(array_size * sizeof(int)); 
+	cudaMemcpy(array_is_odd_host, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
+	print_file(array_is_odd_host); 
 	
 	// compute array_index by prefix scan 
 	prefix_scan<<<blocks, threads, threads * sizeof(int)>>>(array_is_odd, array_index, array_size); 
-	cudaDeviceSynchronize(); 
+	cudaThreadSynchronize(); 
 	
 	// get the number of odd numbers 
 	cudaMemcpy(num_odd, &array_index[array_size - 1], sizeof(int), cudaMemcpyDeviceToHost); 
@@ -189,7 +194,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
 	
 	// compute the result
 	get_odd<<<blocks, threads>>>(array_device, array_device_out, array_is_odd, array_index, array_size, *num_odd); 
-	cudaDeviceSynchronize(); 
+	cudaThreadSynchronize(); 
 	
 	// allocate CPU memory for the result array 
 	int * array_o = (int *)malloc((*num_odd) * sizeof(int)); 
@@ -229,11 +234,11 @@ int main(void) {
     cudaEventElapsedTime(&elapsedTime, start, stop);
 	
 	// print to file 
-	print_file(array_o, num_odd); 
+	// print_file(array_o, num_odd); 
 	
 	// print debug information to stdout 
 	printf(">> Number of odd numbers found: %d\n", num_odd); 
-	printf(">> Average time elapsed in part a: %f\n", elapsedTime);
+	printf(">> Average time elapsed: %f\n", elapsedTime);
 	
 	// finish 
 	free(array_i); 
