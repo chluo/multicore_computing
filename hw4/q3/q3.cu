@@ -215,7 +215,7 @@ int main(void) {
 	
 	// do compact 
 	int num_odd = 0; 
-	// int * array_o = compact(array_i, &num_odd, array_size); 
+	int * array_o = compact(array_i, &num_odd, array_size); 
 	
 	// print to file 
 	// print_file(array_o, num_odd); 
