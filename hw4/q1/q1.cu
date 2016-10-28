@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h> 
 #include <cuda_runtime.h>
 
 #define MAX_ARRAY_SIZE 1000000
@@ -43,7 +44,7 @@ __global__ void shmem_reduce_kernel(int * d_out, const int * d_in, const int siz
 void reduce(int * d_out, int * d_intermediate, int * d_in, int size)
 {
     // assumes that size is not greater than maxThreadsPerBlock^2
-    const int maxThreadsPerBlock = 512;
+    const int maxThreadsPerBlock = (int)sqrt((double)size);
     int threads = maxThreadsPerBlock;
     int blocks = (size + maxThreadsPerBlock - 1) / maxThreadsPerBlock;
     shmem_reduce_kernel<<<blocks, threads, threads * sizeof(int)>>>(d_intermediate, d_in, size);
@@ -104,16 +105,6 @@ int main(void)
     }
     int dev = 0;
     cudaSetDevice(dev);
-
-    // cudaDeviceProp devProps;
-    // if (cudaGetDeviceProperties(&devProps, dev) == 0)
-    // {
-        // printf("Using device %d:\n", dev);
-        // printf("%s; global mem: %dB; compute v%d.%d; clock: %d kHz\n",
-               // devProps.name, (int)devProps.totalGlobalMem,
-               // (int)devProps.major, (int)devProps.minor,
-               // (int)devProps.clockRate);
-    // }
     
     // data array on host 
     int array_size = 0; 
@@ -122,7 +113,7 @@ int main(void)
     // printf(">> Number of data read in: %d\n", array_size); 
     
     /* 
-    * Part a 
+    * part a 
     */ 
 
     // declare GPU memory pointers
@@ -164,17 +155,17 @@ int main(void)
 	fclose(fptr_a); 
 
     // free GPU memory allocation
-    // Reuse d_in for the input array of part b
-    // Reuse d_intermediate for the output array of part b
+    // reuse d_in for the input array of part b
+    // reuse d_intermediate for the output array of part b
     cudaFree(d_out);
     
     
     /*
-    * Part b
+    * part b
     */ 
     
     d_out = d_intermediate; 
-    int numThreadPerBlock = 512; 
+    int numThreadPerBlock = (int)sqrt((double)array_size); 
     int numBlock = (array_size + numThreadPerBlock - 1) / numThreadPerBlock; 
     
     // launch the kernel
@@ -202,11 +193,11 @@ int main(void)
     }
     fclose(fptr_b); 
     
-    // Free CPU memory allocation 
+    // free CPU memory allocation 
     free(h_in); 
     free(h_out_array); 
     
-    // Free GPU memory allocation 
+    // free GPU memory allocation 
     cudaFree(d_in); 
     cudaFree(d_intermediate); 
 
