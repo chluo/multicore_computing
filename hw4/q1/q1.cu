@@ -62,7 +62,7 @@ __global__ void last_digit_kernel(int * d_out, const int * d_in, const int size)
     int myId = threadIdx.x + blockDim.x * blockIdx.x;
     
 	if (myId < size)
-		d_out[myId] = sdata[tid] % 10; 
+		d_out[myId] = d_in[myId] % 10; 
 }
 
 /* 
