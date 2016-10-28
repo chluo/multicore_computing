@@ -289,7 +289,7 @@ int * shmem_counter(int * array_i, int array_size) {
     
     // do reduction for each range 
     for (int i = 0; i < 10; ++i) {
-        reduce(&array_device_out[i], array_device_reduction_inter, &array_device_inter[blocks * i], blocks); 
+        reduce(array_device_out + i, array_device_reduction_inter, array_device_inter + blocks * i, blocks); 
     }
     cudaThreadSynchronize(); 
     
