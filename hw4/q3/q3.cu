@@ -117,16 +117,29 @@ __global__ void odd_check(int * array_i, int * array_o, int array_size) {
 * GPU kernel: inclusive prefix scan 
 */ 
 __global__ void prefix_scan(int * array_io, int array_size) {
+	// shared memory to store intermediate results 
+	extern __shared__ int sdata[]; 
 	
 	int myId = threadIdx.x + blockDim.x * blockIdx.x;
+	int thId = threadIdx.x; 
+	
+	// load initial values to shared memory 
+	sdata[thId] = array_io[myId]; 
+	__syncthreads(); 
 	
 	// do scan in shared memory 
 	int dist = 1; 
 	while (dist < array_size) {
+		// store block results in shared memory 
 		if (!(myId < dist) && myId < array_size) {
-			array_io[myId] += array_io[myId - dist]; 
+			sdata[thId] += array_io[myId - dist]; 
 		}
 		__syncthreads();  
+		// copy results to global memory 
+		if (myId < array_size) {
+			array_io[myId] = sdata[thId]; 
+		}
+		__syncthreads(); 
 		dist *= 2; 
 	}
 }
@@ -172,7 +185,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
 	cudaMemcpy(array_index, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToDevice); 
 	
 	// compute array_index by prefix scan 
-	prefix_scan<<<blocks, threads>>>(array_index, array_size); 
+	prefix_scan<<<blocks, threads, threads * sizeof(int)>>>(array_index, array_size); 
 	cudaThreadSynchronize(); 
 	
 	// debug 
@@ -187,7 +200,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
 	int * array_device_out; 
 	cudaMalloc((void **) &array_device_out, (*num_odd) * sizeof(int)); 
 	
-	// compute the result
+	// collect the final result in GPU 
 	get_odd<<<blocks, threads>>>(array_device, array_device_out, array_is_odd, array_index, array_size, *num_odd); 
 	cudaThreadSynchronize(); 
 	
