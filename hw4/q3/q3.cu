@@ -114,9 +114,9 @@ __global__ void odd_check(int * array_i, int * array_o, int array_size) {
 }
 
 /* 
-* GPU kernel: inclusive prefix scan 
+* GPU kernel: inclusive prefix scan, one step 
 */ 
-__global__ void prefix_scan(int * array_io, int array_size) {
+__global__ void prefix_scan_step(int * array_io, int array_size, int dist) {
 	// shared memory to store intermediate results 
 	extern __shared__ int sdata[]; 
 	
@@ -127,19 +127,32 @@ __global__ void prefix_scan(int * array_io, int array_size) {
 	sdata[thId] = array_io[myId]; 
 	__syncthreads(); 
 	
-	// do scan in shared memory 
+	// store block results in shared memory 
+	if (!(myId < dist) && myId < array_size) {
+		sdata[thId] += array_io[myId - dist]; 
+	}
+	__syncthreads();  
+	// copy results to global memory 
+	if (myId < array_size) {
+		array_io[myId] = sdata[thId]; 
+	}
+	__syncthreads(); 
+
+}
+
+/* 
+* Inclusive prefix scan
+*/ 
+void prefix_scan(int * array_io, int array_size) {
+	// dynamically calculate the number of threads and blocks 
+	const int maxThreadsPerBlock = calc_num_thread(array_size);
+    int threads = maxThreadsPerBlock;
+    int blocks = (array_size + maxThreadsPerBlock - 1) / maxThreadsPerBlock;
+	
 	int dist = 1; 
 	while (dist < array_size) {
-		// store block results in shared memory 
-		if (!(myId < dist) && myId < array_size) {
-			sdata[thId] += array_io[myId - dist]; 
-		}
-		__syncthreads();  
-		// copy results to global memory 
-		if (myId < array_size) {
-			array_io[myId] = sdata[thId]; 
-		}
-		__syncthreads(); 
+		prefix_scan_step<<<blocks, threads, threads * sizeof(int)>>>(array_io, array_size, dist); 
+		cudaThreadSynchronize(); 
 		dist *= 2; 
 	}
 }
@@ -185,7 +198,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
 	cudaMemcpy(array_index, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToDevice); 
 	
 	// compute array_index by prefix scan 
-	prefix_scan<<<blocks, threads, threads * sizeof(int)>>>(array_index, array_size); 
+	prefix_scan(array_index, array_size); 
 	cudaThreadSynchronize(); 
 	
 	// debug 
