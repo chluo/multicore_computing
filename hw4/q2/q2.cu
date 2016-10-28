@@ -182,7 +182,8 @@ __global__ void global_counter_kernel(int * array_i, int * cnt_o, int array_size
 }
 
 /* 
-* part a 
+* part a: global memory counter 
+* returns the pointer to the result array B 
 */ 
 int * global_counter(int * array_i, int array_size) {
     // dynamically calculate the number of threads and blocks 
@@ -210,6 +211,91 @@ int * global_counter(int * array_i, int array_size) {
     // finish 
     cudaFree(array_device); 
     cudaFree(array_device_out); 
+    return array_o; 
+}
+
+/* 
+* GPU kernel for part b 
+* cnt_matrix dimensions: 10 x (# of blocks) 
+*/ 
+__global__ void shmem_counter_kernel(int * array_i, int * cnt_matrix, int array_size) {
+    // shared counter within block, initially all 0 
+    // size: 11 * sizeof(int) 
+    // one extra int for numbers greater than 1000 
+    extern __shared__ int scnt[]; 
+    
+    // block-local counter 
+    int myId = threadIdx.x + blockDim.x * blockIdx.x; 
+    if (myId < array_size) {
+        atomicAdd(&scnt[array_i[myId] / 100], 1); 
+    }
+    __syncthreads(); 
+    
+    // copy the counter values to shared memory 
+    // only have 10 values 
+    if (threadIdx.x < 10) {
+        cnt_matrix[threadIdx.x * blockDim.x + blockIdx.x] = scnt[threadIdx.x]; 
+    }
+}
+
+/* 
+* part b: shared memory counter 
+* returns the pointer to the result array B 
+*/ 
+int * shmem_counter(int * array_i, int array_size) {
+    // dynamically calculate the number of threads and blocks 
+    const int maxThreadsPerBlock = calc_num_thread(array_size);
+    int threads = maxThreadsPerBlock;
+    int blocks = (array_size + maxThreadsPerBlock - 1) / maxThreadsPerBlock;
+    
+    // allocate GPU global memories for input & output arrays and intermediate counter matrix  
+    int * array_device, * array_device_inter, * array_device_out; 
+    cudaMalloc((void **) &array_device, array_size * sizeof(int)); 
+    cudaMalloc((void **) &array_device_inter, 10 * array_size * sizeof(int)); 
+    cudaMalloc((void **) &array_device_out, 10 * sizeof(int)); 
+    
+    /* --------------------------------------------------------------------------------
+     * The intermediate counter matrix 
+     *
+     *             block 0 | block 1 | block 2 | ... ... | block N* 
+     * [  0,  99]
+     * [100, 199]
+     * [200, 299]
+     * ... ... 
+     * [900, 999]
+     *
+     * *Note: the number of blocks, N, is stored in variable "blocks"
+    -------------------------------------------------------------------------------- */
+    
+    // allocate GPU global memory for reduction's intermediate results 
+    int * array_device_reduction_inter; 
+    cudaMalloc((void **) &array_device_reduction_inter, blocks * sizeof(int)); 
+    
+    // allocate CPU memory for the output array  
+    int * array_o = (int *)malloc(10 * sizeof(int));  
+    
+    // copy the input array into GPU shared memory 
+    cudaMemcpy(array_device, array_i, array_size * sizeof(int), cudaMemcpyHostToDevice); 
+    
+    // launch the counter kernel 
+    // shared memory size: 11 * sizeof(int) 
+    // one extra int for numbers greater than 1000 
+    shmem_counter_kernel<<<blocks, threads, 11 * sizeof(int)>>>(array_device, array_device_inter, array_size); 
+    cudaThreadSynchronize(); 
+    
+    // do reduction for each range 
+    for (int i = 0; i < 10; ++i) {
+        reduce(&array_device_out[i], array_device_reduction_inter, &array_device_inter[blocks * i], blocks); 
+    }
+    
+    // copy result back to CPU 
+    cudaMemcpy(array_o, array_device_out, 10 * sizeof(int), cudaMemcpyDeviceToHost); 
+    
+    // finish 
+    cudaFree(array_device); 
+    cudaFree(array_device_out); 
+    cudaFree(array_device_inter); 
+    cudaFree(array_device_reduction_inter); 
     return array_o; 
 }
 
@@ -243,7 +329,22 @@ int main(void) {
     printf(">> Average time elapsed in part a: %f\n", elapsedTime);
     
     // part b ------------------------------------------------------------ 
-
+    cudaEventRecord(start, 0);
+    array_o = global_counter(array_i, array_size); 
+    cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&elapsedTime, start, stop);
+        
+    // print to file 
+    print_file(array_o, 10, "./q2b.txt"); 
     
+    // print debug information to stdout 
+    printf(">> Average time elapsed in part b: %f\n", elapsedTime);
+    
+    // part c ------------------------------------------------------------ 
+    
+    // finish 
+    free(array_i); 
+    free(array_o); 
     return 0; 
 }
