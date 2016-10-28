@@ -289,7 +289,7 @@ int * shmem_counter(int * array_i, int array_size) {
     
     // debug
     int * debug = (int *)malloc(10 * blocks * sizeof(int)); 
-    cudaMemcpy(debug, array_device_inter, 10 * array_size *sizeof(int), cudaMemcpyDeviceToHost); 
+    cudaMemcpy(debug, array_device_inter, 10 * blocks *sizeof(int), cudaMemcpyDeviceToHost); 
     print_file(debug, 10 * blocks, "debug.txt"); 
     
     // do reduction for each range 
