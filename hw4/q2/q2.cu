@@ -170,6 +170,7 @@ void reduce(int * d_out, int * d_intermediate, int * d_in, int size)
     threads = blocks; // launch one thread for each block in prev step
     blocks = 1;
     shmem_reduce_kernel<<<blocks, threads, threads * sizeof(int)>>>(d_out, d_intermediate, threads);
+    printf("%d\n", *d_out); 
 }
 
 /* 
@@ -291,7 +292,7 @@ int * shmem_counter(int * array_i, int array_size) {
     
     // do reduction for each range 
     for (int i = 0; i < 10; ++i) {
-        reduce(&array_device_out[i], array_device_reduction_inter, &array_device_inter[blocks * i], 790);  
+        reduce(&array_device_out[i], array_device_reduction_inter, &array_device_inter[blocks * i], blocks);  
     }
        
     // copy result back to CPU 
