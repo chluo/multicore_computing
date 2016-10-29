@@ -167,7 +167,7 @@ int main(void)
     // printf(">> Min value returned by device: %d\n", h_out);
 	
 	// output the result into file 
-    FILE * fptr_a = fopen("./q1.txt", "w"); 
+    FILE * fptr_a = fopen("./q1a.txt", "w"); 
     if (!fptr_a) {
         printf("!! Error in opening output file \n"); 
         exit(1);
