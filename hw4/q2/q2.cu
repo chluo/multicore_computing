@@ -138,7 +138,7 @@ __global__ void shmem_reduce_kernel(int * d_out, const int * d_in, const int siz
     __syncthreads();            // make sure entire block is loaded!
 
     // do reduction in shared mem
-    for (unsigned int s = blockDim.x / 2; s > 0; s = (s + 1)/2)
+    for (unsigned int s = (blockDim.x + 1) / 2; s > 0; s = (s + 1) / 2)
     {
         if (tid < s && (myId + s) < size)
         {
