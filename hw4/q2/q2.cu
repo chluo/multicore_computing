@@ -163,17 +163,17 @@ void reduce(int * d_out, int * d_intermediate, int * d_in, int size)
     const int maxThreadsPerBlock = calc_num_thread(size);
     int threads = maxThreadsPerBlock;
     int blocks = (size + maxThreadsPerBlock - 1) / maxThreadsPerBlock;
-    shmem_reduce_kernel<<<blocks, threads, threads * sizeof(int)>>>(d_intermediate, d_in, size);
-    cudaThreadSynchronize(); 
+    shmem_reduce_kernel<<<blocks, threads, threads * sizeof(int)>>>(d_intermediate, d_in, size); 
+    
+    // debug 
+    int * debug = (int *)malloc(blocks * sizeof(int)); 
+    cudaMemcpy(debug, d_intermediate, blocks * sizeof(int), cudaMemcpyDeviceToHost); 
+    print_file(debug, blocks, "./debug.txt"); 
 
     // now we're down to one block left, so reduce it
     threads = blocks; // launch one thread for each block in prev step
     blocks = 1;
     shmem_reduce_kernel<<<blocks, threads, threads * sizeof(int)>>>(d_out, d_intermediate, threads);
-    
-    int out; 
-    cudaMemcpy(&out, d_out, sizeof(int), cudaMemcpyDeviceToHost); 
-    printf("%d\n", out); 
 }
 
 /* 
