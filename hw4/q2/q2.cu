@@ -202,7 +202,6 @@ int * global_counter(int * array_i, int array_size) {
     
     // launch the kernel 
     global_counter_kernel<<<blocks, threads>>>(array_device, array_device_out, array_size); 
-    cudaThreadSynchronize(); 
     
     // allocate CPU memory for output array 
     int * array_o = (int *)malloc(10 * sizeof(int)); 
@@ -292,7 +291,7 @@ int * shmem_counter(int * array_i, int array_size) {
     
     // do reduction for each range 
     for (int i = 0; i < 10; ++i) {
-        reduce(&array_device_out[i], array_device_reduction_inter, &array_device_inter[blocks * i], blocks);  
+        reduce(&array_device_out[i], array_device_reduction_inter, &array_device_inter[blocks * i], 790);  
     }
        
     // copy result back to CPU 
