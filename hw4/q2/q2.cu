@@ -170,7 +170,10 @@ void reduce(int * d_out, int * d_intermediate, int * d_in, int size)
     threads = blocks; // launch one thread for each block in prev step
     blocks = 1;
     shmem_reduce_kernel<<<blocks, threads, threads * sizeof(int)>>>(d_out, d_intermediate, threads);
-    printf("%d\n", *d_out); 
+    
+    int out; 
+    cudaMemcpy(&out, d_out, sizeof(int), cudaMemcpyDeviceToHost); 
+    printf("%d\n", out); 
 }
 
 /* 
