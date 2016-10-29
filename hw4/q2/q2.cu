@@ -313,6 +313,32 @@ int * shmem_counter(int * array_i, int array_size) {
 }
 
 /* 
+* part c: prefix scan
+* returns the pointer to the result array C  
+*/ 
+int * integrate_counter(int * array_i, int array_size) {
+    // allocate GPU global memories for input/output array 
+    int * array_device; 
+    cudaMalloc((void **) &array_device, array_size * sizeof(int)); 
+    
+    // copy the input array into GPU shared memory 
+    cudaMemcpy(array_device, array_i, array_size * sizeof(int), cudaMemcpyHostToDevice); 
+    
+    // run prefix scan
+    prefix_scan(array_device, array_size); 
+    
+    // allocate CPU memory for the output array  
+    int * array_o = (int *)malloc(array_size * sizeof(int));  
+    
+    // copy result back to CPU 
+    cudaMemcpy(array_o, array_device_out, array_size * sizeof(int), cudaMemcpyDeviceToHost);
+    
+    // finish 
+    cudaFree(array_device); 
+    return array_o; 
+}
+
+/* 
 * CPU main routine 
 */ 
 int main(void) {
@@ -359,18 +385,17 @@ int main(void) {
     printf(">> Average time elapsed in part b: %f\n", elapsedTime);
     
     // part c ------------------------------------------------------------ 
-    // take array_o_a for prefix scan, result stored in array_o_a  
     cudaEvent_t start_c, stop_c;
     cudaEventCreate(&start_c);
     cudaEventCreate(&stop_c);
-    cudaEventRecord(start_c, 0);
-    prefix_scan(array_o_a, array_size); 
+    cudaEventRecord(start_c, 0);   
+    int * array_o_c = integrate_counter(array_o_b, 10);    
     cudaEventRecord(stop_c, 0);
     cudaEventSynchronize(stop_c);
     cudaEventElapsedTime(&elapsedTime, start_c, stop_c);
     
     // print to file 
-    print_file(array_o_a, 10, "./q2c.txt");
+    print_file(array_o_c, 10, "./q2c.txt");
     
     // print debug information to stdout 
     printf(">> Average time elapsed in part c: %f\n", elapsedTime);
@@ -379,5 +404,6 @@ int main(void) {
     free(array_i); 
     free(array_o_a); 
     free(array_o_b); 
+    free(array_o_c); 
     return 0; 
 }
