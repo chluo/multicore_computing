@@ -359,6 +359,21 @@ int main(void) {
     printf(">> Average time elapsed in part b: %f\n", elapsedTime);
     
     // part c ------------------------------------------------------------ 
+    // take array_o_a for prefix scan, result stored in array_o_a  
+    cudaEvent_t start_c, stop_c;
+    cudaEventCreate(&start_c);
+    cudaEventCreate(&stop_c);
+    cudaEventRecord(start_c, 0);
+    prefix_scan(array_o_a, array_size); 
+    cudaEventRecord(stop_c, 0);
+    cudaEventSynchronize(stop_c);
+    cudaEventElapsedTime(&elapsedTime, start_c, stop_c);
+    
+    // print to file 
+    print_file(array_o_a, 10, "./q2c.txt");
+    
+    // print debug information to stdout 
+    printf(">> Average time elapsed in part c: %f\n", elapsedTime);
     
     // finish 
     free(array_i); 
