@@ -73,7 +73,7 @@ __global__ void shmem_reduce_kernel(int * d_out, const int * d_in, const int siz
     // do reduction in shared mem
     for (unsigned int s = blockDim.x / 2; s > 0; s >>= 1)
     {
-        if (tid < s && myId < size && (myId + s) < size)
+        if (tid < s && (myId + s) < size)
         {
             if (sdata[tid] > sdata[tid + s])
                 sdata[tid] = sdata[tid + s]; 
@@ -100,9 +100,9 @@ void reduce(int * d_out, int * d_intermediate, int * d_in, int size)
     shmem_reduce_kernel<<<blocks, threads, threads * sizeof(int)>>>(d_intermediate, d_in, size);
 
     // now we're down to one block left, so reduce it
-    threads = round_up_pow2(blocks); // make sure to be a power of 2
+    threads = blocks; 
     blocks = 1;
-    shmem_reduce_kernel<<<blocks, threads, threads * sizeof(int)>>>(d_out, d_intermediate, threads);
+    shmem_reduce_kernel<<<blocks, round_up_pow2(threads), threads * sizeof(int)>>>(d_out, d_intermediate, threads);
 }
 
 /* 

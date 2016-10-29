@@ -174,9 +174,9 @@ void reduce(int * d_out, int * d_intermediate, int * d_in, int size)
     shmem_reduce_kernel<<<blocks, threads, threads * sizeof(int)>>>(d_intermediate, d_in, size); 
 
     // now we're down to one block left, so reduce it
-    threads = round_up_pow2(blocks); // make sure to be a power of 2
+    threads = blocks; 
     blocks = 1;
-    shmem_reduce_kernel<<<blocks, threads, threads * sizeof(int)>>>(d_out, d_intermediate, threads);
+    shmem_reduce_kernel<<<blocks, round_up_pow2(threads), threads * sizeof(int)>>>(d_out, d_intermediate, threads);
 }
 
 /* 
