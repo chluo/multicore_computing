@@ -294,6 +294,11 @@ int * shmem_counter(int * array_i, int array_size) {
     int * debug = (int *)malloc(10 * blocks * sizeof(int)); 
     cudaMemcpy(debug, array_device_inter, 10 * blocks *sizeof(int), cudaMemcpyDeviceToHost); 
     print_file(debug, 10 * blocks, "debug.txt"); 
+    int sum = 0; 
+    for (int i = 0; i < blocks; ++i) {
+        sum += debug[i]; 
+    }
+    printf("%d\n", sum); 
     
     // do reduction for each range 
     for (int i = 0; i < 10; ++i) {
