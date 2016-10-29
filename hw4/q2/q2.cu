@@ -289,23 +289,22 @@ int * shmem_counter(int * array_i, int array_size) {
     // shared memory size: 11 * sizeof(int) 
     // one extra int for numbers greater than 1000 
     shmem_counter_kernel<<<blocks, threads, 11 * sizeof(int)>>>(array_device, array_device_inter, array_size, blocks); 
-    cudaThreadSynchronize(); 
+    // cudaThreadSynchronize(); 
     
     // debug
-    int * debug = (int *)malloc(10 * blocks * sizeof(int)); 
-    cudaMemcpy(debug, array_device_inter, 10 * blocks *sizeof(int), cudaMemcpyDeviceToHost); 
-    print_file(debug, 10 * blocks, "debug.txt"); 
-    int sum = 0; 
-    for (int i = 0; i < blocks; ++i) {
-        sum += debug[i]; 
-    }
-    printf("%d\n", sum); 
+    // int * debug = (int *)malloc(10 * blocks * sizeof(int)); 
+    // cudaMemcpy(debug, array_device_inter, 10 * blocks *sizeof(int), cudaMemcpyDeviceToHost); 
+    // print_file(debug, 10 * blocks, "debug.txt"); 
+    // int sum = 0; 
+    // for (int i = 0; i < blocks; ++i) {
+        // sum += debug[i]; 
+    // }
+    // printf("%d\n", sum); 
     
     // do reduction for each range 
-    //for (int i = 0; i < 10; ++i) {
-        reduce(array_device_out /* + i */, array_device_reduction_inter, array_device_inter /* + blocks * i */, blocks + 1); 
-        cudaThreadSynchronize(); 
-    //}
+    for (int i = 0; i < 10; ++i) {
+        reduce(array_device_out + i, array_device_reduction_inter, array_device_inter + blocks * i, blocks);  
+    }
        
     // copy result back to CPU 
     cudaMemcpy(array_o, array_device_out, 10 * sizeof(int), cudaMemcpyDeviceToHost); 
