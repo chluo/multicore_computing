@@ -164,6 +164,7 @@ void reduce(int * d_out, int * d_intermediate, int * d_in, int size)
     int threads = maxThreadsPerBlock;
     int blocks = (size + maxThreadsPerBlock - 1) / maxThreadsPerBlock;
     shmem_reduce_kernel<<<blocks, threads, threads * sizeof(int)>>>(d_intermediate, d_in, size);
+    cudaThreadSynchronize(); 
 
     // now we're down to one block left, so reduce it
     threads = blocks; // launch one thread for each block in prev step
