@@ -201,6 +201,7 @@ int * global_counter(int * array_i, int array_size) {
     
     // launch the kernel 
     global_counter_kernel<<<blocks, threads>>>(array_device, array_device_out, array_size); 
+    cudaThreadSynchronize(); 
     
     // allocate CPU memory for output array 
     int * array_o = (int *)malloc(10 * sizeof(int)); 
