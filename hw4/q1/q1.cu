@@ -6,6 +6,56 @@
 #define MAX_ARRAY_SIZE 1000000
 
 /* 
+* Read data from ./inp.txt 
+* Store the data in (int * data)
+* Return the number of elements read into the array
+*/ 
+int * read_data(int * size) 
+{
+    FILE * fptr = fopen("./inp.txt", "r"); 
+    if (!fptr) {
+        printf("!! Error in opening data file \n"); 
+        exit(1); 
+    }
+    int cur_array_size = MAX_ARRAY_SIZE; 
+    int * buffer = (int *)malloc(cur_array_size * sizeof(int)); 
+    
+    int i = 0; 
+    while (!feof(fptr)) {
+        if (fscanf(fptr, "%d,", &buffer[i]) != 1) {
+            printf("!! Error in importing data from file \n"); 
+            exit(1); 
+        }
+        ++i;         
+    }
+    
+	fclose(fptr); 
+    *size = i; 
+    return buffer; 
+}
+
+/* 
+* Round up to the nearest power of 2
+*/ 
+int round_up_pow2(int val) {
+    if (val == 0) return 1; 
+    int pow2 = 1; 
+    while (pow2 < val) {
+        pow2 <<= 1; 
+    }
+    return pow2; 
+}
+
+/*
+* Calculate the number of threads per block based on array size 
+*/ 
+int calc_num_thread(int size) {
+    int approx = (int)sqrt((double)size); 
+    // find the nearest power of 2 
+    return round_up_pow2(approx); 
+}
+
+/* 
 * GPU kernel for part a: reduction, getting the min value in a sub-array
 */ 
 __global__ void shmem_reduce_kernel(int * d_out, const int * d_in, const int size)
@@ -38,19 +88,6 @@ __global__ void shmem_reduce_kernel(int * d_out, const int * d_in, const int siz
     }
 }
 
-/*
-* Calculate the number of threads per block based on array size 
-*/ 
-int calc_num_thread(int size) {
-	int approx = (int)sqrt((double)size); 
-	// find the nearest power of 2 
-	int pow2 = 1; 
-	while (pow2 < approx) {
-		pow2 <<= 1; 
-	}
-	return pow2; 
-}
-
 /* 
 * Reduction-based algorithm to find the min value in (int * d_in) 
 */ 
@@ -63,7 +100,7 @@ void reduce(int * d_out, int * d_intermediate, int * d_in, int size)
     shmem_reduce_kernel<<<blocks, threads, threads * sizeof(int)>>>(d_intermediate, d_in, size);
 
     // now we're down to one block left, so reduce it
-    threads = blocks; // launch one thread for each block in prev step
+    threads = round_up_pow2(blocks); // make sure to be a power of 2
     blocks = 1;
     shmem_reduce_kernel<<<blocks, threads, threads * sizeof(int)>>>(d_out, d_intermediate, threads);
 }
@@ -77,35 +114,6 @@ __global__ void last_digit_kernel(int * d_out, const int * d_in, const int size)
     
 	if (myId < size)
 		d_out[myId] = d_in[myId] % 10; 
-}
-
-/* 
-* Read data from ./inp.txt 
-* Store the data in (int * data)
-* Return the number of elements read into the array
-*/ 
-int * read_data(int * size) 
-{
-    FILE * fptr = fopen("./inp.txt", "r"); 
-    if (!fptr) {
-        printf("!! Error in opening data file \n"); 
-        exit(1); 
-    }
-    int cur_array_size = MAX_ARRAY_SIZE; 
-    int * buffer = (int *)malloc(cur_array_size * sizeof(int)); 
-    
-    int i = 0; 
-    while (!feof(fptr)) {
-        if (fscanf(fptr, "%d,", &buffer[i]) != 1) {
-            printf("!! Error in importing data from file \n"); 
-            exit(1); 
-        }
-        ++i;         
-    }
-    
-	fclose(fptr); 
-    *size = i; 
-    return buffer; 
 }
 
 int main(void)
