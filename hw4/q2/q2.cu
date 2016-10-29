@@ -142,7 +142,9 @@ __global__ void shmem_reduce_kernel(int * d_out, const int * d_in, const int siz
     {
         if (tid < s && (myId + s) < size)
         {
-            sdata[tid] += sdata[tid + s]; 
+            if (tid + s < blockDim.x) {
+                sdata[tid] += sdata[tid + s]; 
+            }
         }
         __syncthreads();        // make sure all adds at one stage are done!
     }
