@@ -226,7 +226,9 @@ __global__ void shmem_counter_kernel(int * array_i, int * cnt_matrix, int array_
     extern __shared__ int scnt[]; 
     
     // initialize to 0 
-    scnt[threadIdx.x] = 0; 
+    if (threadIdx.x < 10) {
+        scnt[threadIdx.x] = 0; 
+    }
     __syncthreads();
     
     // block-local counter 
