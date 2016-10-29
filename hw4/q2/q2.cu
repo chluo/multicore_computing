@@ -140,7 +140,7 @@ __global__ void shmem_reduce_kernel(int * d_out, const int * d_in, const int siz
     // do reduction in shared mem
     for (unsigned int s = blockDim.x / 2; s > 0; s >>= 1)
     {
-        if (tid < s && myId < size && (myId + s) < size)
+        if (tid < s && (myId + s) < size)
         {
             sdata[tid] += sdata[tid + s]; 
         }
@@ -302,10 +302,10 @@ int * shmem_counter(int * array_i, int array_size) {
     printf("%d\n", sum); 
     
     // do reduction for each range 
-    for (int i = 0; i < 10; ++i) {
-        reduce(array_device_out + i, array_device_reduction_inter, array_device_inter + blocks * i, blocks); 
+    //for (int i = 0; i < 10; ++i) {
+        reduce(array_device_out /* + i */, array_device_reduction_inter, array_device_inter /* + blocks * i */, blocks); 
         cudaThreadSynchronize(); 
-    }
+    //}
        
     // copy result back to CPU 
     cudaMemcpy(array_o, array_device_out, 10 * sizeof(int), cudaMemcpyDeviceToHost); 
