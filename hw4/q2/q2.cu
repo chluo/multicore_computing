@@ -331,7 +331,7 @@ int * integrate_counter(int * array_i, int array_size) {
     int * array_o = (int *)malloc(array_size * sizeof(int));  
     
     // copy result back to CPU 
-    cudaMemcpy(array_o, array_device_out, array_size * sizeof(int), cudaMemcpyDeviceToHost);
+    cudaMemcpy(array_o, array_device, array_size * sizeof(int), cudaMemcpyDeviceToHost);
     
     // finish 
     cudaFree(array_device); 
