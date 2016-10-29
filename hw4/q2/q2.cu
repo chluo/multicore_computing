@@ -19,17 +19,25 @@ void check_dev(void) {
     cudaSetDevice(dev);
 }
 
+/* 
+* Round up to the nearest power of 2
+*/ 
+int round_up_pow2(int val) {
+    if (val == 0) return 1; 
+    int pow2 = 1; 
+    while (pow2 < val) {
+        pow2 <<= 1; 
+    }
+    return pow2; 
+}
+
 /*
 * Calculate the number of threads per block based on array size 
 */ 
 int calc_num_thread(int size) {
     int approx = (int)sqrt((double)size); 
     // find the nearest power of 2 
-    int pow2 = 1; 
-    while (pow2 < approx) {
-        pow2 <<= 1; 
-    }
-    return pow2; 
+    return round_up_pow2(approx); 
 }
 
 /* 
@@ -138,13 +146,11 @@ __global__ void shmem_reduce_kernel(int * d_out, const int * d_in, const int siz
     __syncthreads();            // make sure entire block is loaded!
 
     // do reduction in shared mem
-    for (unsigned int s = (blockDim.x + 1) / 2; s > 0; s = (s == 1) ? 0 : (s + 1) / 2)
+    for (unsigned int s = blockDim.x / 2; s > 0; s = s / 2)
     {
         if (tid < s && (myId + s) < size)
         {
-            if (tid + s < blockDim.x) {
-                sdata[tid] += sdata[tid + s]; 
-            }
+            sdata[tid] += sdata[tid + s]; 
         }
         __syncthreads();        // make sure all adds at one stage are done!
     }
@@ -166,14 +172,9 @@ void reduce(int * d_out, int * d_intermediate, int * d_in, int size)
     int threads = maxThreadsPerBlock;
     int blocks = (size + maxThreadsPerBlock - 1) / maxThreadsPerBlock;
     shmem_reduce_kernel<<<blocks, threads, threads * sizeof(int)>>>(d_intermediate, d_in, size); 
-    
-    // debug 
-    int * debug = (int *)malloc(blocks * sizeof(int)); 
-    cudaMemcpy(debug, d_intermediate, blocks * sizeof(int), cudaMemcpyDeviceToHost); 
-    print_file(debug, blocks, "./debug.txt"); 
 
     // now we're down to one block left, so reduce it
-    threads = blocks; // launch one thread for each block in prev step
+    threads = round_up_pow2(blocks); // make sure to be a power of 2
     blocks = 1;
     shmem_reduce_kernel<<<blocks, threads, threads * sizeof(int)>>>(d_out, d_intermediate, threads);
 }
