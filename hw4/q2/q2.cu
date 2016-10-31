@@ -52,7 +52,7 @@ int calc_num_thread(int size) {
 */ 
 int * read_data(int * size) 
 {
-    FILE * fptr = fopen("./inp_long.txt", "r"); 
+    FILE * fptr = fopen("./inp.txt", "r"); 
     if (!fptr) {
         printf("!! Error in opening data file \n"); 
         exit(1); 
@@ -381,7 +381,7 @@ int main(void) {
     print_file(array_o_a, 10, "./q2a.txt"); 
     
     // print debug information to stdout 
-    printf(">> Average time elapsed in part a: %f\n", elapsedTime);
+    // printf(">> Average time elapsed in part a: %f\n", elapsedTime);
 
     
     // part b ------------------------------------------------------------ 
@@ -398,7 +398,7 @@ int main(void) {
     print_file(array_o_b, 10, "./q2b.txt"); 
     
     // print debug information to stdout 
-    printf(">> Average time elapsed in part b: %f\n", elapsedTime);
+    // printf(">> Average time elapsed in part b: %f\n", elapsedTime);
     
     // part c ------------------------------------------------------------ 
     cudaEvent_t start_c, stop_c;
@@ -414,7 +414,7 @@ int main(void) {
     print_file(array_o_c, 10, "./q2c.txt");
     
     // print debug information to stdout 
-    printf(">> Average time elapsed in part c: %f\n", elapsedTime);
+    // printf(">> Average time elapsed in part c: %f\n", elapsedTime);
     
     // finish 
     free(array_i); 
