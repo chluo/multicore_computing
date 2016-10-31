@@ -153,6 +153,14 @@ void prefix_scan(int * array_io, int array_size) {
         prefix_scan_step<<<blocks, threads, threads * sizeof(int)>>>(array_io, array_size, dist); 
         cudaThreadSynchronize(); 
         dist *= 2; 
+        
+        if (dist == 1) {
+        // TODO: debug 
+        int * debug = (int *)malloc(array_size * sizeof(int)); 
+        cudaMemcpy(debug, array_io, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
+        print_file(debug, array_size, "./debug2.txt"); 
+        free(debug); 
+        }
     }
 }
 
@@ -211,7 +219,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
     cudaThreadSynchronize(); 
     
     // TODO: debug 
-    printf("%s\n", cudaGetErrorString(cudaPeekAtLastError()));
+    // printf("%s\n", cudaGetErrorString(cudaPeekAtLastError()));
     int * debug = (int *)malloc(array_size * sizeof(int)); 
     cudaMemcpy(debug, array_index, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
     print_file(debug, array_size, "./debug.txt"); 
@@ -223,11 +231,11 @@ int * compact(int * array_i, int * num_odd, int array_size) {
     // copy the result from GPU to CPU
     cudaMemcpy(array_o, array_device_out, (*num_odd) * sizeof(int), cudaMemcpyDeviceToHost); 
     
-    // finish 
-    cudaFree(array_device); 
+    // finish     
     cudaFree(array_device_out); 
-    cudaFree(array_is_odd); 
     cudaFree(array_index); 
+    cudaFree(array_is_odd); 
+    cudaFree(array_device); 
     return array_o; 
 }
 

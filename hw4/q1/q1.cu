@@ -12,7 +12,7 @@
 */ 
 int * read_data(int * size) 
 {
-    FILE * fptr = fopen("./inp_long.txt", "r"); 
+    FILE * fptr = fopen("./inp.txt", "r"); 
     if (!fptr) {
         printf("!! Error in opening data file \n"); 
         exit(1); 
