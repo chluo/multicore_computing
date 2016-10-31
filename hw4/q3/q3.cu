@@ -244,9 +244,9 @@ void prefix_scan(int * array_i, int * array_o, int array_size) {
 __global__ void get_odd(int * array_i, int * array_o, /* int * array_is_odd, */ int * array_index, int array_size/* , int num_odd */) {
     int myId = threadIdx.x + blockDim.x * blockIdx.x;
     if (myId < array_size) {
-        if (/* array_is_odd[myId] */ (myId == 0 && myId > 0) || (array_index[myId] > array_index[myId - 1])) {
+        // if (/* array_is_odd[myId] */ (myId == 0 && myId > 0) || (array_index[myId] > array_index[myId - 1])) {
             array_o[array_index[myId] - 1] = array_i[myId]; 
-        }
+        // }
     }
 }
 
@@ -277,10 +277,12 @@ int * compact(int * array_i, int * num_odd, int array_size) {
     
     // TODO: debug 
     // printf("%s\n", cudaGetErrorString(cudaPeekAtLastError()));
+    /* 
     int * debug = (int *)malloc(array_size * sizeof(int)); 
     cudaMemcpy(debug, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
     print_file(debug, array_size, "./debug.txt"); 
     free(debug);     
+    */ 
         
     // populate array_index with initial values  
     cudaMemcpy(array_index, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToDevice); 
