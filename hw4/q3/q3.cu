@@ -150,10 +150,12 @@ void prefix_scan(int * array_io, int array_size) {
     
     int dist = 1; 
     while (dist < array_size) {
+        printf("Dist is %d\n", dist); 
         prefix_scan_step<<<blocks, threads, threads * sizeof(int)>>>(array_io, array_size, dist); 
         cudaThreadSynchronize(); 
         dist *= 2; 
         
+        printf("Dist is %d\n", dist); 
         if (dist == 1) {
         // TODO: debug 
         int * debug = (int *)malloc(array_size * sizeof(int)); 
