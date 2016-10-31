@@ -45,6 +45,11 @@ void check_dev(void) {
 
 /*
 * Calculate the number of threads per block based on array size 
+* The function is so designed that a reduction on the array can 
+* be completed in two steps. 
+* The assumption is that the size of the array is no more than 
+* 1,000,000, such that the number of threads is no more than 
+* 1024, which is the computational limit of the GPU device. 
 */ 
 int calc_num_thread(int size) {
     int approx = (int)sqrt((double)size); 
@@ -114,6 +119,8 @@ __global__ void odd_check(int * array_i, int * array_o, int array_size) {
 
 /* 
 * GPU kernel: inclusive prefix scan, one step 
+* The result can not be stored in the original array since different blocks
+* cannot be synchronized within the kernel 
 */ 
 __global__ void prefix_scan_step(int * array_i, int * array_o, int array_size, int dist) {
     // shared memory to store intermediate results 
@@ -138,18 +145,6 @@ __global__ void prefix_scan_step(int * array_i, int * array_o, int array_size, i
 }
 
 /* 
-* GPU kernel: inclusive prefix scan, copy result of one step to the input of the next step  
-*/ 
-/* 
-__global__ void prefix_scan_copy(int * array_i, int * array_o, int array_size) {
-    int myId = threadIdx.x + blockDim.x * blockIdx.x;
-    if (myId < array_size) {
-        array_i[myId] = array_o[myId]; 
-    }
-} 
-*/ 
-
-/* 
 * Inclusive prefix scan
 */ 
 void prefix_scan(int * array_i, int * array_o, int array_size) {
@@ -160,82 +155,18 @@ void prefix_scan(int * array_i, int * array_o, int array_size) {
     
     int dist = 1, i = 0; 
     while (dist < array_size) {
-        if (i % 2 == 0) {
+        // each array is alternatively used as the kernel input or output to avoid the overhead of 
+        // copying the output to the input in evey iteration 
+        if (i % 2 == 0) 
             prefix_scan_step<<<blocks, threads, threads * sizeof(int)>>>(array_i, array_o, array_size, dist);            
-        }
-        else {
+        else 
             prefix_scan_step<<<blocks, threads, threads * sizeof(int)>>>(array_o, array_i, array_size, dist);
-        }
-        cudaDeviceSynchronize(); 
-        // prefix_scan_copy<<<blocks, threads>>>(array_i, array_o, array_size); 
-        // cudaDeviceSynchronize(); 
-        // cudaMemcpy(array_i, array_o, array_size * sizeof(int), cudaMemcpyDeviceToDevice); 
         
-        /* 
-        if (dist == 1) {
-            int * debug = (int *)malloc(array_size * sizeof(int)); 
-            cudaMemcpy(debug, array_io, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
-            print_file(debug, array_size, "./debug1.txt"); 
-            free(debug); 
-        }
-        if (dist == 2) {
-            int * debug = (int *)malloc(array_size * sizeof(int)); 
-            cudaMemcpy(debug, array_io, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
-            print_file(debug, array_size, "./debug2.txt"); 
-            free(debug); 
-        }        
-        if (dist == 4) {
-            int * debug = (int *)malloc(array_size * sizeof(int)); 
-            cudaMemcpy(debug, array_io, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
-            print_file(debug, array_size, "./debug4.txt"); 
-            free(debug); 
-        }
-        if (dist == 8) {
-            int * debug = (int *)malloc(array_size * sizeof(int)); 
-            cudaMemcpy(debug, array_io, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
-            print_file(debug, array_size, "./debug8.txt"); 
-            free(debug); 
-        }     
-        if (dist == 16) {
-            int * debug = (int *)malloc(array_size * sizeof(int)); 
-            cudaMemcpy(debug, array_io, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
-            print_file(debug, array_size, "./debug16.txt"); 
-            free(debug); 
-        }   
-        if (dist == 32) {
-            int * debug = (int *)malloc(array_size * sizeof(int)); 
-            cudaMemcpy(debug, array_io, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
-            print_file(debug, array_size, "./debug32.txt"); 
-            free(debug); 
-        }      
-        if (dist == 64) {
-            int * debug = (int *)malloc(array_size * sizeof(int)); 
-            cudaMemcpy(debug, array_io, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
-            print_file(debug, array_size, "./debug64.txt"); 
-            free(debug); 
-        }     
-        if (dist == 128) {
-            int * debug = (int *)malloc(array_size * sizeof(int)); 
-            cudaMemcpy(debug, array_io, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
-            print_file(debug, array_size, "./debug128.txt"); 
-            free(debug); 
-        }  
-        if (dist == 262144) {
-            int * debug = (int *)malloc(array_size * sizeof(int)); 
-            cudaMemcpy(debug, array_io, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
-            print_file(debug, array_size, "./debug262144.txt"); 
-            free(debug); 
-        }        
-        if (dist == 524288) {
-            int * debug = (int *)malloc(array_size * sizeof(int)); 
-            cudaMemcpy(debug, array_io, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
-            print_file(debug, array_size, "./debug524288.txt"); 
-            free(debug); 
-        }
-        */ 
+        cudaDeviceSynchronize(); 
         ++i; 
         dist *= 2; 
     }
+    
     if (i % 2 == 0)
         cudaMemcpy(array_o, array_i, array_size * sizeof(int), cudaMemcpyDeviceToDevice); 
 }
@@ -246,6 +177,7 @@ void prefix_scan(int * array_i, int * array_o, int array_size) {
 __global__ void get_odd(int * array_i, int * array_o, int * array_is_odd, int * array_index, int array_size/* , int num_odd */) {
     int myId = threadIdx.x + blockDim.x * blockIdx.x;
     if (myId < array_size) {
+        // the alternative method which is commented out causes a lot of overhead on the superscalar cores 
         if (array_is_odd[myId] /* (myId == 0 && myId > 0) || (array_index[myId] > array_index[myId - 1]) */) {
             array_o[array_index[myId] - 1] = array_i[myId]; 
         }
@@ -276,16 +208,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
     
     // compute array_is_odd 
     odd_check<<<blocks, threads>>>(array_device, array_is_odd, array_size); 
-    cudaDeviceSynchronize();   
-    
-    // TODO: debug 
-    // printf("%s\n", cudaGetErrorString(cudaPeekAtLastError()));
-    /* 
-    int * debug = (int *)malloc(array_size * sizeof(int)); 
-    cudaMemcpy(debug, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
-    print_file(debug, array_size, "./debug.txt"); 
-    free(debug);     
-    */ 
+    cudaDeviceSynchronize();    
         
     // populate array_index with initial values  
     cudaMemcpy(array_index_buffer, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToDevice); 
@@ -311,7 +234,8 @@ int * compact(int * array_i, int * num_odd, int array_size) {
     cudaMemcpy(array_o, array_device_out, (*num_odd) * sizeof(int), cudaMemcpyDeviceToHost); 
     
     // finish     
-    cudaFree(array_device_out); 
+    cudaFree(array_device_out);
+    cudaFree(array_index_buffer); 
     cudaFree(array_index); 
     cudaFree(array_is_odd); 
     cudaFree(array_device); 
@@ -345,8 +269,8 @@ int main(void) {
     print_file(array_o, num_odd, "./q3.txt"); 
     
     // print debug information to stdout 
-    printf(">> Number of odd numbers found: %d\n", num_odd); 
-    printf(">> Average time elapsed: %f\n", elapsedTime);
+    // printf(">> Number of odd numbers found: %d\n", num_odd); 
+    // printf(">> Average time elapsed: %f\n", elapsedTime);
     
     // finish 
     free(array_i); 

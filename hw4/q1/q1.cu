@@ -47,6 +47,11 @@ int round_up_pow2(int val) {
 
 /*
 * Calculate the number of threads per block based on array size 
+* The function is so designed that a reduction on the array can 
+* be completed in two steps. 
+* The assumption is that the size of the array is no more than 
+* 1,000,000, such that the number of threads is no more than 
+* 1024, which is the computational limit of the GPU device. 
 */ 
 int calc_num_thread(int size) {
     int approx = (int)sqrt((double)size); 

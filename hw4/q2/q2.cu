@@ -33,6 +33,11 @@ int round_up_pow2(int val) {
 
 /*
 * Calculate the number of threads per block based on array size 
+* The function is so designed that a reduction on the array can 
+* be completed in two steps. 
+* The assumption is that the size of the array is no more than 
+* 1,000,000, such that the number of threads is no more than 
+* 1024, which is the computational limit of the GPU device. 
 */ 
 int calc_num_thread(int size) {
     int approx = (int)sqrt((double)size); 
@@ -87,8 +92,10 @@ void print_file(int * array, int array_size, const char fname[]) {
 
 /* 
 * GPU kernel: inclusive prefix scan, one step 
+* The result can not be stored in the original array since different blocks
+* cannot be synchronized within the kernel 
 */ 
-__global__ void prefix_scan_step(int * array_io, int array_size, int dist) {
+__global__ void prefix_scan_step(int * array_i, int * array_o, int array_size, int dist) {
     // shared memory to store intermediate results 
     extern __shared__ int sdata[]; 
     
@@ -96,37 +103,45 @@ __global__ void prefix_scan_step(int * array_io, int array_size, int dist) {
     int thId = threadIdx.x; 
     
     // load initial values to shared memory 
-    sdata[thId] = array_io[myId]; 
+    sdata[thId] = array_i[myId]; 
     __syncthreads(); 
     
     // store block results in shared memory 
     if (!(myId < dist) && myId < array_size) {
-        sdata[thId] += array_io[myId - dist]; 
+        sdata[thId] += array_i[myId - dist]; 
     }
     __syncthreads();  
     // copy results to global memory 
     if (myId < array_size) {
-        array_io[myId] = sdata[thId]; 
+        array_o[myId] = sdata[thId]; 
     }
-    __syncthreads(); 
-
 }
 
 /* 
 * Inclusive prefix scan
 */ 
-void prefix_scan(int * array_io, int array_size) {
+void prefix_scan(int * array_i, int * array_o, int array_size) {
     // dynamically calculate the number of threads and blocks 
     const int maxThreadsPerBlock = calc_num_thread(array_size);
     int threads = maxThreadsPerBlock;
     int blocks = (array_size + maxThreadsPerBlock - 1) / maxThreadsPerBlock;
     
-    int dist = 1; 
+    int dist = 1, i = 0; 
     while (dist < array_size) {
-        prefix_scan_step<<<blocks, threads, threads * sizeof(int)>>>(array_io, array_size, dist); 
-        cudaThreadSynchronize(); 
+        // each array is alternatively used as the kernel input or output to avoid the overhead of 
+        // copying the output to the input in evey iteration 
+        if (i % 2 == 0) 
+            prefix_scan_step<<<blocks, threads, threads * sizeof(int)>>>(array_i, array_o, array_size, dist);            
+        else 
+            prefix_scan_step<<<blocks, threads, threads * sizeof(int)>>>(array_o, array_i, array_size, dist);
+        
+        cudaDeviceSynchronize(); 
+        ++i; 
         dist *= 2; 
     }
+    
+    if (i % 2 == 0)
+        cudaMemcpy(array_o, array_i, array_size * sizeof(int), cudaMemcpyDeviceToDevice); 
 }
 
 /* 
@@ -317,14 +332,16 @@ int * shmem_counter(int * array_i, int array_size) {
 */ 
 int * integrate_counter(int * array_i, int array_size) {
     // allocate GPU global memories for input/output array 
-    int * array_device; 
+    int * array_device, * array_buffer; 
     cudaMalloc((void **) &array_device, array_size * sizeof(int)); 
+    cudaMalloc((void **) &array_buffer, array_size * sizeof(int)); 
     
     // copy the input array into GPU shared memory 
     cudaMemcpy(array_device, array_i, array_size * sizeof(int), cudaMemcpyHostToDevice); 
+    cudaMemcpy(array_buffer, array_device, array_size * sizeof(int), cudaMemcpyDeviceToDevice); 
     
     // run prefix scan
-    prefix_scan(array_device, array_size); 
+    prefix_scan(array_buffer, array_device, array_size); 
     
     // allocate CPU memory for the output array  
     int * array_o = (int *)malloc(array_size * sizeof(int));  
