@@ -159,7 +159,7 @@ void prefix_scan(int * array_io, int array_size) {
 /* 
 * GPU kernel: compact the input array to get the odd numbers 
 */ 
-__global__ void get_odd(int * array_i, int * array_o, /* int * array_is_odd, */ int * array_index, int array_size, /* int num_odd */) {
+__global__ void get_odd(int * array_i, int * array_o, /* int * array_is_odd, */ int * array_index, int array_size/* , int num_odd */) {
     int myId = threadIdx.x + blockDim.x * blockIdx.x;
     if (myId < array_size) {
         if (/* array_is_odd[myId] */ (myId == 0 && myId > 0) || (array_index[myId] > array_index[myId - 1])) {
@@ -219,7 +219,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
     cudaMalloc((void **) &array_device_out, (*num_odd) * sizeof(int)); 
         
     // collect the final result in GPU 
-    get_odd<<<blocks, threads>>>(array_device, array_device_out, /* array_is_odd, */ array_index, array_size, /* *num_odd */); 
+    get_odd<<<blocks, threads>>>(array_device, array_device_out, /* array_is_odd, */ array_index, array_size/* , *num_odd */); 
     cudaDeviceSynchronize(); 
       
     // allocate CPU memory for the result array 
