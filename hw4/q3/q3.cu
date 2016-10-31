@@ -156,11 +156,32 @@ void prefix_scan(int * array_io, int array_size) {
         
         printf("Dist is %d\n", dist); 
         if (dist == 2) {
-        // TODO: debug 
-        int * debug = (int *)malloc(array_size * sizeof(int)); 
-        cudaMemcpy(debug, array_io, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
-        print_file(debug, array_size, "./debug2.txt"); 
-        free(debug); 
+            // TODO: debug 
+            int * debug = (int *)malloc(array_size * sizeof(int)); 
+            cudaMemcpy(debug, array_io, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
+            print_file(debug, array_size, "./debug1.txt"); 
+            free(debug); 
+        }
+        if (dist == 4) {
+            // TODO: debug 
+            int * debug = (int *)malloc(array_size * sizeof(int)); 
+            cudaMemcpy(debug, array_io, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
+            print_file(debug, array_size, "./debug2.txt"); 
+            free(debug); 
+        }
+        if (dist == 8) {
+            // TODO: debug 
+            int * debug = (int *)malloc(array_size * sizeof(int)); 
+            cudaMemcpy(debug, array_io, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
+            print_file(debug, array_size, "./debug4.txt"); 
+            free(debug); 
+        }
+        if (dist == 16) {
+            // TODO: debug 
+            int * debug = (int *)malloc(array_size * sizeof(int)); 
+            cudaMemcpy(debug, array_io, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
+            print_file(debug, array_size, "./debug8.txt"); 
+            free(debug); 
         }
     }
 }
@@ -222,7 +243,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
     // TODO: debug 
     // printf("%s\n", cudaGetErrorString(cudaPeekAtLastError()));
     int * debug = (int *)malloc(array_size * sizeof(int)); 
-    cudaMemcpy(debug, array_index, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
+    cudaMemcpy(debug, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
     print_file(debug, array_size, "./debug.txt"); 
     free(debug); 
     
