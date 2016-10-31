@@ -151,7 +151,7 @@ void prefix_scan(int * array_io, int array_size) {
     int dist = 1; 
     while (dist < array_size) {
         prefix_scan_step<<<blocks, threads, threads * sizeof(int)>>>(array_io, array_size, dist); 
-        cudaThreadSynchronize(); 
+        cudaDeviceSynchronize(); 
         dist *= 2; 
     }
 }
@@ -194,7 +194,14 @@ int * compact(int * array_i, int * num_odd, int array_size) {
     
     // compute array_is_odd 
     odd_check<<<blocks, threads>>>(array_device, array_is_odd, array_size); 
-    cudaThreadSynchronize();    
+    cudaDeviceSynchronize();   
+    
+    // TODO: debug 
+    // printf("%s\n", cudaGetErrorString(cudaPeekAtLastError()));
+    int * debug = (int *)malloc(array_size * sizeof(int)); 
+    cudaMemcpy(debug, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
+    print_file(debug, array_size, "./debug.txt"); 
+    free(debug);     
         
     // populate array_index with initial values  
     // cudaMemcpy(array_index, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToDevice); 
@@ -202,12 +209,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
     // compute array_index by prefix scan 
     prefix_scan(array_index, array_size); 
     
-    // TODO: debug 
-    // printf("%s\n", cudaGetErrorString(cudaPeekAtLastError()));
-    int * debug = (int *)malloc(array_size * sizeof(int)); 
-    cudaMemcpy(debug, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
-    print_file(debug, array_size, "./debug.txt"); 
-    free(debug); 
+
         
     // get the number of odd numbers 
     cudaMemcpy(num_odd, &array_index[array_size - 1], sizeof(int), cudaMemcpyDeviceToHost); 
@@ -218,7 +220,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
         
     // collect the final result in GPU 
     get_odd<<<blocks, threads>>>(array_device, array_device_out, /* array_is_odd, */ array_index, array_size, *num_odd); 
-    cudaThreadSynchronize(); 
+    cudaDeviceSynchronize(); 
       
     // allocate CPU memory for the result array 
     int * array_o = (int *)malloc((*num_odd) * sizeof(int)); 
