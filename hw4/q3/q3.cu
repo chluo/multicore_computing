@@ -192,30 +192,25 @@ int * compact(int * array_i, int * num_odd, int array_size) {
     // compute array_is_odd 
     odd_check<<<blocks, threads>>>(array_device, array_is_odd, array_size); 
     cudaThreadSynchronize();    
-    
-    printf("%s\n", cudaGetErrorString(cudaPeekAtLastError()));
-    
+        
     // populate array_index with initial values  
     cudaMemcpy(array_index, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToDevice); 
-    
-    printf("%s\n", cudaGetErrorString(cudaPeekAtLastError()));
-    
+        
     // compute array_index by prefix scan 
     prefix_scan(array_index, array_size); 
-    
-    printf("%s\n", cudaGetErrorString(cudaPeekAtLastError()));
-    
+        
     // get the number of odd numbers 
     cudaMemcpy(num_odd, &array_index[array_size - 1], sizeof(int), cudaMemcpyDeviceToHost); 
-    
-    printf("%s\n", cudaGetErrorString(cudaPeekAtLastError()));
-    
+        
     // allocate GPU memory for the result array 
     int * array_device_out; 
     cudaMalloc((void **) &array_device_out, (*num_odd) * sizeof(int)); 
     
+    printf("%s\n", cudaGetErrorString(cudaPeekAtLastError()));
+    
     // collect the final result in GPU 
     get_odd<<<blocks, threads>>>(array_device, array_device_out, array_is_odd, array_index, array_size, *num_odd); 
+    printf("%s\n", cudaGetErrorString(cudaPeekAtLastError()));
     cudaThreadSynchronize(); 
     
     // TODO: debug 
