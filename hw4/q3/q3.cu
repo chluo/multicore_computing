@@ -160,6 +160,7 @@ void prefix_scan(int * array_i, int * array_o, int array_size) {
     while (dist < array_size) {
         if (i % 2 == 0) {
             prefix_scan_step<<<blocks, threads, threads * sizeof(int)>>>(array_i, array_o, array_size, dist); 
+            
         }
         else {
             prefix_scan_step<<<blocks, threads, threads * sizeof(int)>>>(array_o, array_i, array_size, dist);
@@ -241,12 +242,12 @@ void prefix_scan(int * array_i, int * array_o, int array_size) {
 /* 
 * GPU kernel: compact the input array to get the odd numbers 
 */ 
-__global__ void get_odd(int * array_i, int * array_o, /* int * array_is_odd, */ int * array_index, int array_size/* , int num_odd */) {
+__global__ void get_odd(int * array_i, int * array_o, int * array_is_odd, int * array_index, int array_size/* , int num_odd */) {
     int myId = threadIdx.x + blockDim.x * blockIdx.x;
     if (myId < array_size) {
-        // if (/* array_is_odd[myId] */ (myId == 0 && myId > 0) || (array_index[myId] > array_index[myId - 1])) {
+        if (array_is_odd[myId] /* (myId == 0 && myId > 0) || (array_index[myId] > array_index[myId - 1]) */) {
             array_o[array_index[myId] - 1] = array_i[myId]; 
-        // }
+        }
     }
 }
 
@@ -267,9 +268,10 @@ int * compact(int * array_i, int * num_odd, int array_size) {
     cudaMemcpy(array_device, array_i, array_size * sizeof(int), cudaMemcpyHostToDevice); 
     
     // allocate GPU memories for array_is_odd and array_index 
-    int * array_is_odd, * array_index; 
+    int * array_is_odd, * array_index, * array_index_buffer; 
     cudaMalloc((void **) &array_is_odd, array_size * sizeof(int)); 
     cudaMalloc((void **) &array_index, array_size * sizeof(int)); 
+    cudaMalloc((void **) &array_index_buffer, array_size * sizeof(int));
     
     // compute array_is_odd 
     odd_check<<<blocks, threads>>>(array_device, array_is_odd, array_size); 
@@ -285,10 +287,10 @@ int * compact(int * array_i, int * num_odd, int array_size) {
     */ 
         
     // populate array_index with initial values  
-    cudaMemcpy(array_index, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToDevice); 
+    cudaMemcpy(array_index_buffer, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToDevice); 
         
     // compute array_index by prefix scan 
-    prefix_scan(array_is_odd, array_index, array_size); 
+    prefix_scan(array_index_buffer, array_index, array_size); 
         
     // get the number of odd numbers 
     cudaMemcpy(num_odd, &array_index[array_size - 1], sizeof(int), cudaMemcpyDeviceToHost); 
@@ -298,7 +300,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
     cudaMalloc((void **) &array_device_out, (*num_odd) * sizeof(int)); 
         
     // collect the final result in GPU 
-    get_odd<<<blocks, threads>>>(array_device, array_device_out, /* array_is_odd, */ array_index, array_size/* , *num_odd */); 
+    get_odd<<<blocks, threads>>>(array_device, array_device_out, array_is_odd, array_index, array_size/* , *num_odd */); 
     cudaDeviceSynchronize(); 
       
     // allocate CPU memory for the result array 
