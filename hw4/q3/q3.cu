@@ -198,7 +198,6 @@ int * compact(int * array_i, int * num_odd, int array_size) {
     
     // compute array_index by prefix scan 
     prefix_scan(array_index, array_size); 
-    cudaThreadSynchronize(); 
     
     // get the number of odd numbers 
     cudaMemcpy(num_odd, &array_index[array_size - 1], sizeof(int), cudaMemcpyDeviceToHost); 
@@ -212,6 +211,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
     cudaThreadSynchronize(); 
     
     // TODO: debug 
+    printf("%d\n", array_size); 
     int * debug = (int *)malloc(array_size * sizeof(int)); 
     cudaMemcpy(debug, array_index, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
     print_file(debug, array_size, "./debug.txt"); 
