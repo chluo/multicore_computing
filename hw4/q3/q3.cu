@@ -41,17 +41,6 @@ void check_dev(void) {
     }
     int dev = 0;
     cudaSetDevice(dev);
-    
-    // TODO: debug 
-    cudaDeviceProp devProps;
-    if (cudaGetDeviceProperties(&devProps, dev) == 0)
-    {
-        printf("Using device %d:\n", dev);
-        printf("%s; global mem: %dB; compute v%d.%d; clock: %d kHz\n",
-               devProps.name, (int)devProps.totalGlobalMem,
-               (int)devProps.major, (int)devProps.minor,
-               (int)devProps.clockRate);
-    }
 }
 
 /*
@@ -74,7 +63,7 @@ int calc_num_thread(int size) {
 */ 
 int * read_data(int * size) 
 {
-    FILE * fptr = fopen("./inp_long.txt", "r"); 
+    FILE * fptr = fopen("./inp.txt", "r"); 
     if (!fptr) {
         printf("!! Error in opening data file \n"); 
         exit(1); 
@@ -164,36 +153,6 @@ void prefix_scan(int * array_io, int array_size) {
         prefix_scan_step<<<blocks, threads, threads * sizeof(int)>>>(array_io, array_size, dist); 
         cudaThreadSynchronize(); 
         dist *= 2; 
-        
-        printf("Dist is %d\n", dist); 
-        if (dist == 2) {
-            // TODO: debug 
-            int * debug = (int *)malloc(array_size * sizeof(int)); 
-            cudaMemcpy(debug, array_io, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
-            print_file(debug, array_size, "./debug1.txt"); 
-            free(debug); 
-        }
-        if (dist == 4) {
-            // TODO: debug 
-            int * debug = (int *)malloc(array_size * sizeof(int)); 
-            cudaMemcpy(debug, array_io, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
-            print_file(debug, array_size, "./debug2.txt"); 
-            free(debug); 
-        }
-        if (dist == 8) {
-            // TODO: debug 
-            int * debug = (int *)malloc(array_size * sizeof(int)); 
-            cudaMemcpy(debug, array_io, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
-            print_file(debug, array_size, "./debug4.txt"); 
-            free(debug); 
-        }
-        if (dist == 16) {
-            // TODO: debug 
-            int * debug = (int *)malloc(array_size * sizeof(int)); 
-            cudaMemcpy(debug, array_io, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
-            print_file(debug, array_size, "./debug8.txt"); 
-            free(debug); 
-        }
     }
 }
 
@@ -203,7 +162,7 @@ void prefix_scan(int * array_io, int array_size) {
 __global__ void get_odd(int * array_i, int * array_o, int * array_is_odd, int * array_index, int array_size, int num_odd) {
     int myId = threadIdx.x + blockDim.x * blockIdx.x;
     if (myId < array_size) {
-        if (array_is_odd[myId]) {
+        if (/* array_is_odd[myId] */ array_index[myId] > array_index[myId - 1]) {
             array_o[array_index[myId] - 1] = array_i[myId]; 
         }
     }
