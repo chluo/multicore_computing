@@ -351,6 +351,7 @@ int * integrate_counter(int * array_i, int array_size) {
     
     // finish 
     cudaFree(array_device); 
+    cudaFree(array_buffer); 
     return array_o; 
 }
 
