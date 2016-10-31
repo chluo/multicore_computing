@@ -155,19 +155,19 @@ void prefix_scan(int * array_io, int array_size) {
         
         if (dist == 1) {
             int * debug = (int *)malloc(array_size * sizeof(int)); 
-            cudaMemcpy(debug, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
+            cudaMemcpy(debug, array_io, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
             print_file(debug, array_size, "./debug1.txt"); 
             free(debug); 
         }
         if (dist == 2) {
             int * debug = (int *)malloc(array_size * sizeof(int)); 
-            cudaMemcpy(debug, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
+            cudaMemcpy(debug, array_io, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
             print_file(debug, array_size, "./debug2.txt"); 
             free(debug); 
         }        
         if (dist == 4) {
             int * debug = (int *)malloc(array_size * sizeof(int)); 
-            cudaMemcpy(debug, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
+            cudaMemcpy(debug, array_io, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
             print_file(debug, array_size, "./debug4.txt"); 
             free(debug); 
         }
