@@ -115,7 +115,7 @@ __global__ void odd_check(int * array_i, int * array_o, int array_size) {
 /* 
 * GPU kernel: inclusive prefix scan, one step 
 */ 
-__global__ void prefix_scan_step(int * array_i, array_o, int array_size, int dist) {
+__global__ void prefix_scan_step(int * array_i, int * array_o, int array_size, int dist) {
     // shared memory to store intermediate results 
     extern __shared__ int sdata[]; 
     
@@ -123,7 +123,7 @@ __global__ void prefix_scan_step(int * array_i, array_o, int array_size, int dis
     int thId = threadIdx.x; 
     
     // load initial values to shared memory 
-    sdata[thId] = array_io[myId]; 
+    sdata[thId] = array_i[myId]; 
     __syncthreads(); 
     
     // store block results in shared memory 
