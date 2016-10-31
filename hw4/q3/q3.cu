@@ -41,6 +41,17 @@ void check_dev(void) {
     }
     int dev = 0;
     cudaSetDevice(dev);
+    
+    // TODO: debug 
+    cudaDeviceProp devProps;
+    if (cudaGetDeviceProperties(&devProps, dev) == 0)
+    {
+        printf("Using device %d:\n", dev);
+        printf("%s; global mem: %dB; compute v%d.%d; clock: %d kHz\n",
+               devProps.name, (int)devProps.totalGlobalMem,
+               (int)devProps.major, (int)devProps.minor,
+               (int)devProps.clockRate);
+    }
 }
 
 /*
