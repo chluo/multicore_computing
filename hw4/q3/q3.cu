@@ -171,6 +171,12 @@ void prefix_scan(int * array_io, int array_size) {
             print_file(debug, array_size, "./debug4.txt"); 
             free(debug); 
         }
+         if (dist == 524288) {
+            int * debug = (int *)malloc(array_size * sizeof(int)); 
+            cudaMemcpy(debug, array_io, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
+            print_file(debug, array_size, "./debug524288.txt"); 
+            free(debug); 
+        }
         
         dist *= 2; 
     }
