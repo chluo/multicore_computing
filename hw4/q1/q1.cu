@@ -23,8 +23,7 @@ int * read_data(int * size)
     int i = 0; 
     while (!feof(fptr)) {
         if (fscanf(fptr, "%d,", &buffer[i]) != 1) {
-            printf("!! Error in importing data from file: %d \n", i); 
-            exit(1); 
+            break; 
         }
         ++i;         
     }
