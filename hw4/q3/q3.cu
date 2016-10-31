@@ -205,13 +205,10 @@ int * compact(int * array_i, int * num_odd, int array_size) {
     // allocate GPU memory for the result array 
     int * array_device_out; 
     cudaMalloc((void **) &array_device_out, (*num_odd) * sizeof(int)); 
-    
-    printf("%s\n", cudaGetErrorString(cudaPeekAtLastError()));
-    
+        
     // collect the final result in GPU 
     get_odd<<<blocks, threads>>>(array_device, array_device_out, array_is_odd, array_index, array_size, *num_odd); 
-    printf("%s\n", cudaGetErrorString(cudaPeekAtLastError()));
-    cudaThreadSynchronize(); 
+    // cudaThreadSynchronize(); 
     
     // TODO: debug 
     printf("%s\n", cudaGetErrorString(cudaPeekAtLastError()));
