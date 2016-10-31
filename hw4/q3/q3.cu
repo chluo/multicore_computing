@@ -152,6 +152,7 @@ void prefix_scan(int * array_i, int * array_o, int array_size) {
     while (dist < array_size) {
         prefix_scan_step<<<blocks, threads, threads * sizeof(int)>>>(array_i, array_o, array_size, dist); 
         cudaDeviceSynchronize(); 
+        cudaMemcpy(array_i, array_o, array_size * sizeof(int), cudaMemcpyDeviceToDevice); 
         
         /* 
         if (dist == 1) {
