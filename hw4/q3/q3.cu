@@ -211,7 +211,6 @@ int * compact(int * array_i, int * num_odd, int array_size) {
     cudaThreadSynchronize(); 
     
     // TODO: debug 
-    printf("%d\n", array_size); 
     int * debug = (int *)malloc(array_size * sizeof(int)); 
     cudaMemcpy(debug, array_index, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
     print_file(debug, array_size, "./debug.txt"); 
