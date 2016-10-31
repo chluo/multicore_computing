@@ -191,14 +191,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
     
     // compute array_is_odd 
     odd_check<<<blocks, threads>>>(array_device, array_is_odd, array_size); 
-    cudaThreadSynchronize(); 
-    
-    // TODO: debug 
-    int * debug = (int *)malloc(array_size * sizeof(int)); 
-    cudaMemcpy(debug, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
-    print_file(debug, array_size, "./debug.txt"); 
-    free(debug); 
-    
+    cudaThreadSynchronize();    
     
     // populate array_index with initial values  
     cudaMemcpy(array_index, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToDevice); 
@@ -217,6 +210,12 @@ int * compact(int * array_i, int * num_odd, int array_size) {
     // collect the final result in GPU 
     get_odd<<<blocks, threads>>>(array_device, array_device_out, array_is_odd, array_index, array_size, *num_odd); 
     cudaThreadSynchronize(); 
+    
+    // TODO: debug 
+    int * debug = (int *)malloc(array_size * sizeof(int)); 
+    cudaMemcpy(debug, array_index, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
+    print_file(debug, array_size, "./debug.txt"); 
+    free(debug); 
     
     // allocate CPU memory for the result array 
     int * array_o = (int *)malloc((*num_odd) * sizeof(int)); 
