@@ -63,7 +63,7 @@ int calc_num_thread(int size) {
 */ 
 int * read_data(int * size) 
 {
-    FILE * fptr = fopen("./inp.txt", "r"); 
+    FILE * fptr = fopen("./inp_long.txt", "r"); 
     if (!fptr) {
         printf("!! Error in opening data file \n"); 
         exit(1); 
@@ -208,7 +208,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
         
     // collect the final result in GPU 
     get_odd<<<blocks, threads>>>(array_device, array_device_out, array_is_odd, array_index, array_size, *num_odd); 
-    // cudaThreadSynchronize(); 
+    cudaThreadSynchronize(); 
     
     // TODO: debug 
     printf("%s\n", cudaGetErrorString(cudaPeekAtLastError()));
