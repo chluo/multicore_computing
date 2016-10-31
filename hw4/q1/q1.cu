@@ -12,7 +12,7 @@
 */ 
 int * read_data(int * size) 
 {
-    FILE * fptr = fopen("./inp.txt", "r"); 
+    FILE * fptr = fopen("./inp_long.txt", "r"); 
     if (!fptr) {
         printf("!! Error in opening data file \n"); 
         exit(1); 
@@ -167,7 +167,7 @@ int main(void)
     int h_out; 
     cudaMemcpy(&h_out, d_out, sizeof(int), cudaMemcpyDeviceToHost);
 
-    // printf(">> Average time elapsed in part a: %f\n", elapsedTime);
+    printf(">> Average time elapsed in part a: %f\n", elapsedTime);
     // printf(">> Min value returned by device: %d\n", h_out);
 	
 	// output the result into file 
@@ -199,7 +199,8 @@ int main(void)
     cudaEventRecord(stop, 0);
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&elapsedTime, start, stop);
-    // printf(">> Average time elapsed of part b: %f\n", elapsedTime);
+    
+    printf(">> Average time elapsed of part b: %f\n", elapsedTime);
     
     // copy back the result array from GPU
     int * h_out_array = (int *)malloc(array_byte); 
