@@ -63,7 +63,7 @@ int calc_num_thread(int size) {
 */ 
 int * read_data(int * size) 
 {
-    FILE * fptr = fopen("./inp_long.txt", "r"); 
+    FILE * fptr = fopen("./inp.txt", "r"); 
     if (!fptr) {
         printf("!! Error in opening data file \n"); 
         exit(1); 
@@ -142,6 +142,7 @@ __global__ void prefix_scan_step(int * array_i, int * array_o, int array_size, i
 /* 
 * GPU kernel: inclusive prefix scan, copy result of one step to the input of the next step  
 */ 
+/* 
 __global__ void prefix_scan_copy(int * array_i, int * array_o, int array_size, int dist) {
     int myId = threadIdx.x + blockDim.x * blockIdx.x;
     if (myId < array_size) {
@@ -149,6 +150,7 @@ __global__ void prefix_scan_copy(int * array_i, int * array_o, int array_size, i
     }
     __syncthreads();
 }
+*/ 
 
 /* 
 * Inclusive prefix scan
@@ -163,9 +165,9 @@ void prefix_scan(int * array_i, int * array_o, int array_size) {
     while (dist < array_size) {
         prefix_scan_step<<<blocks, threads, threads * sizeof(int)>>>(array_i, array_o, array_size, dist); 
         cudaDeviceSynchronize(); 
-        prefix_scan_copy<<<blocks, threads, threads * sizeof(int)>>>(array_i, array_o, array_size, dist); 
-        cudaDeviceSynchronize(); 
-        // cudaMemcpy(array_i, array_o, array_size * sizeof(int), cudaMemcpyDeviceToDevice); 
+        // prefix_scan_copy<<<blocks, threads, threads * sizeof(int)>>>(array_i, array_o, array_size, dist); 
+        // cudaDeviceSynchronize(); 
+        cudaMemcpy(array_i, array_o, array_size * sizeof(int), cudaMemcpyDeviceToDevice); 
         
         /* 
         if (dist == 1) {
