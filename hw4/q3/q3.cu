@@ -76,7 +76,6 @@ int * read_data(int * size)
         if (fscanf(fptr, "%d, ", &buffer[i]) != 1) {
             break; 
         }
-        printf("%d, ", buffer[i]); 
         ++i; 
     }
     
@@ -88,8 +87,8 @@ int * read_data(int * size)
 /* 
 * Outputs the result array into file 
 */ 
-void print_file(int * array, int array_size) {
-    FILE * fptr_b = fopen("./q3.txt", "w"); 
+void print_file(int * array, int array_size, const char file_name[]) {
+    FILE * fptr_b = fopen(file_name, "w"); 
     if (!fptr_b) {
         printf("!! Error in opening output file \n"); 
         exit(1);
@@ -194,6 +193,13 @@ int * compact(int * array_i, int * num_odd, int array_size) {
     odd_check<<<blocks, threads>>>(array_device, array_is_odd, array_size); 
     cudaThreadSynchronize(); 
     
+    // TODO: debug 
+    int * debug = (int *)malloc(array_size * sizeof(int)); 
+    cudaMemcpy(debug, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
+    print_file(debug, array_size, "./debug.txt"); 
+    free(debug); 
+    
+    
     // populate array_index with initial values  
     cudaMemcpy(array_index, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToDevice); 
     
@@ -250,11 +256,11 @@ int main(void) {
     cudaEventElapsedTime(&elapsedTime, start, stop);
     
     // print to file 
-    print_file(array_o, num_odd); 
+    print_file(array_o, num_odd, "./q3.txt"); 
     
     // print debug information to stdout 
-    // printf(">> Number of odd numbers found: %d\n", num_odd); 
-    // printf(">> Average time elapsed: %f\n", elapsedTime);
+    printf(">> Number of odd numbers found: %d\n", num_odd); 
+    printf(">> Average time elapsed: %f\n", elapsedTime);
     
     // finish 
     free(array_i); 
