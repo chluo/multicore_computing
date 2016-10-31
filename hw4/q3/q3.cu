@@ -63,7 +63,7 @@ int calc_num_thread(int size) {
 */ 
 int * read_data(int * size) 
 {
-    FILE * fptr = fopen("./inp_long.txt", "r"); 
+    FILE * fptr = fopen("./inp.txt", "r"); 
     if (!fptr) {
         printf("!! Error in opening data file \n"); 
         exit(1); 
@@ -162,7 +162,7 @@ void prefix_scan(int * array_io, int array_size) {
 __global__ void get_odd(int * array_i, int * array_o, /* int * array_is_odd, */ int * array_index, int array_size, int num_odd) {
     int myId = threadIdx.x + blockDim.x * blockIdx.x;
     if (myId < array_size) {
-        if (/* array_is_odd[myId] */ array_index[myId] > array_index[myId - 1]) {
+        if (/* array_is_odd[myId] */ (myId == 0 && myId > 0) || (array_index[myId] > array_index[myId - 1])) {
             array_o[array_index[myId] - 1] = array_i[myId]; 
         }
     }
