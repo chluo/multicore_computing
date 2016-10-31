@@ -175,7 +175,7 @@ __global__ void get_odd(int * array_i, int * array_o, /* int * array_is_odd, */ 
 */ 
 int * compact(int * array_i, int * num_odd, int array_size) {
     // dynamically calculate the number of threads and blocks 
-    const int maxThreadsPerBlock = calc_num_thread(array_size);
+    const int maxThreadsPerBlock = /* calc_num_thread(array_size) */ 512;
     int threads = maxThreadsPerBlock;
     int blocks = (array_size + maxThreadsPerBlock - 1) / maxThreadsPerBlock;
     
