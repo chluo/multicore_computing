@@ -156,12 +156,17 @@ void prefix_scan(int * array_i, int * array_o, int array_size) {
     int threads = maxThreadsPerBlock;
     int blocks = (array_size + maxThreadsPerBlock - 1) / maxThreadsPerBlock;
     
-    int dist = 1; 
+    int dist = 1, i = 0; 
     while (dist < array_size) {
-        prefix_scan_step<<<blocks, threads, threads * sizeof(int)>>>(array_i, array_o, array_size, dist); 
+        if (i % 2 == 0) {
+            prefix_scan_step<<<blocks, threads, threads * sizeof(int)>>>(array_i, array_o, array_size, dist); 
+        }
+        else {
+            prefix_scan_step<<<blocks, threads, threads * sizeof(int)>>>(array_o, array_i, array_size, dist);
+        }
         cudaDeviceSynchronize(); 
-        prefix_scan_copy<<<blocks, threads>>>(array_i, array_o, array_size); 
-        cudaDeviceSynchronize(); 
+        // prefix_scan_copy<<<blocks, threads>>>(array_i, array_o, array_size); 
+        // cudaDeviceSynchronize(); 
         // cudaMemcpy(array_i, array_o, array_size * sizeof(int), cudaMemcpyDeviceToDevice); 
         
         /* 
@@ -226,9 +231,11 @@ void prefix_scan(int * array_i, int * array_o, int array_size) {
             free(debug); 
         }
         */ 
-        
+        ++i; 
         dist *= 2; 
     }
+    if (i % 2 == 0)
+        cudaMemcpy(array_o, array_i, array_size * sizeof(int), cudaMemcpyDeviceToDevice); 
 }
 
 /* 
