@@ -77,11 +77,10 @@ int * read_data(int * size)
             printf("!! Error in importing data from file \n"); 
             exit(1); 
         }
-        // scan in the commas 
-        char temp_char; 
-        fscanf(fptr, "%c", &temp_char); 
-        ++i;    
-        if (temp_char == EOF) break;        
+        printf("%d, ", buffer[i]); 
+        // scan in the commas  
+        fscanf(fptr, "%*c"); 
+        ++i;       
     }
     
     fclose(fptr); 
