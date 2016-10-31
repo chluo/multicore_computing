@@ -63,7 +63,7 @@ int calc_num_thread(int size) {
 */ 
 int * read_data(int * size) 
 {
-    FILE * fptr = fopen("./inp.txt", "r"); 
+    FILE * fptr = fopen("./inp_long.txt", "r"); 
     if (!fptr) {
         printf("!! Error in opening data file \n"); 
         exit(1); 
@@ -159,7 +159,7 @@ void prefix_scan(int * array_io, int array_size) {
 /* 
 * GPU kernel: compact the input array to get the odd numbers 
 */ 
-__global__ void get_odd(int * array_i, int * array_o, int * array_is_odd, int * array_index, int array_size, int num_odd) {
+__global__ void get_odd(int * array_i, int * array_o, /* int * array_is_odd, */ int * array_index, int array_size, int num_odd) {
     int myId = threadIdx.x + blockDim.x * blockIdx.x;
     if (myId < array_size) {
         if (/* array_is_odd[myId] */ array_index[myId] > array_index[myId - 1]) {
@@ -187,14 +187,17 @@ int * compact(int * array_i, int * num_odd, int array_size) {
     // allocate GPU memories for array_is_odd and array_index 
     int * array_is_odd, * array_index; 
     cudaMalloc((void **) &array_is_odd, array_size * sizeof(int)); 
-    cudaMalloc((void **) &array_index, array_size * sizeof(int)); 
+    // cudaMalloc((void **) &array_index, array_size * sizeof(int)); 
+    
+    // 
+    array_index = array_is_odd; 
     
     // compute array_is_odd 
     odd_check<<<blocks, threads>>>(array_device, array_is_odd, array_size); 
     cudaThreadSynchronize();    
         
     // populate array_index with initial values  
-    cudaMemcpy(array_index, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToDevice); 
+    // cudaMemcpy(array_index, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToDevice); 
         
     // compute array_index by prefix scan 
     prefix_scan(array_index, array_size); 
@@ -214,11 +217,9 @@ int * compact(int * array_i, int * num_odd, int array_size) {
     cudaMalloc((void **) &array_device_out, (*num_odd) * sizeof(int)); 
         
     // collect the final result in GPU 
-    get_odd<<<blocks, threads>>>(array_device, array_device_out, array_is_odd, array_index, array_size, *num_odd); 
+    get_odd<<<blocks, threads>>>(array_device, array_device_out, /* array_is_odd, */ array_index, array_size, *num_odd); 
     cudaThreadSynchronize(); 
-    
-
-    
+      
     // allocate CPU memory for the result array 
     int * array_o = (int *)malloc((*num_odd) * sizeof(int)); 
     
@@ -227,7 +228,7 @@ int * compact(int * array_i, int * num_odd, int array_size) {
     
     // finish     
     cudaFree(array_device_out); 
-    cudaFree(array_index); 
+    // cudaFree(array_index); 
     cudaFree(array_is_odd); 
     cudaFree(array_device); 
     return array_o; 
