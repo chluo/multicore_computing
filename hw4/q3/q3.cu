@@ -144,7 +144,7 @@ __global__ void prefix_scan_step(int * array_io, int array_size, int dist) {
 */ 
 void prefix_scan(int * array_io, int array_size) {
     // dynamically calculate the number of threads and blocks 
-    const int maxThreadsPerBlock = /* calc_num_thread(array_size) */ 512;
+    const int maxThreadsPerBlock = calc_num_thread(array_size);
     int threads = maxThreadsPerBlock;
     int blocks = (array_size + maxThreadsPerBlock - 1) / maxThreadsPerBlock;
     
@@ -152,6 +152,26 @@ void prefix_scan(int * array_io, int array_size) {
     while (dist < array_size) {
         prefix_scan_step<<<blocks, threads, threads * sizeof(int)>>>(array_io, array_size, dist); 
         cudaDeviceSynchronize(); 
+        
+        if (dist == 1) {
+            int * debug = (int *)malloc(array_size * sizeof(int)); 
+            cudaMemcpy(debug, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
+            print_file(debug, array_size, "./debug1.txt"); 
+            free(debug); 
+        }
+        if (dist == 2) {
+            int * debug = (int *)malloc(array_size * sizeof(int)); 
+            cudaMemcpy(debug, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
+            print_file(debug, array_size, "./debug2.txt"); 
+            free(debug); 
+        }        
+        if (dist == 4) {
+            int * debug = (int *)malloc(array_size * sizeof(int)); 
+            cudaMemcpy(debug, array_is_odd, array_size * sizeof(int), cudaMemcpyDeviceToHost); 
+            print_file(debug, array_size, "./debug4.txt"); 
+            free(debug); 
+        }
+        
         dist *= 2; 
     }
 }
