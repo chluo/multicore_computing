@@ -97,7 +97,7 @@
 \begin{document}
 %FILL IN THE RIGHT INFO.
 %\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
-\lecture{1}{August 24}{Vijay Garg}{Your Name}
+\lecture{27}{November 29}{Vijay Garg}{Chunheng Luo}
 %\footnotetext{These notes are partially based on those of Nigel Mansell.}
 
 % **** YOUR NOTES GO HERE:
@@ -106,51 +106,61 @@
 % macros follow.  
 %**** IN GENERAL, BE BRIEF. LONG SCRIBE NOTES, NO MATTER HOW WELL WRITTEN,
 %**** ARE NEVER READ BY ANYBODY.
-\section{Introduction}
-Students in EE 382C are required to scribe lecture notes for one lecture.
-These lecture notes will be done using the document processing system called Latex.
-We have posted the file {\em scribe.tex} on the Canvas system. You can run {\tt pdflatex}
-on that file to generate {\em scribe.pdf}. The remaining document shows usage of
-some of the commands in Latex.
+\section*{Question 1}
+Which of the following statements about blocks and threads in CUDA are \textbf{FALSE}? \\ \\
+\textbf{A}. The maximum number of threads per block is determined by the hardware architecture of the GPU. \\
+\textbf{B}. The method {\em \_\_syncthreads()} acts as a barrier to synchronize all threads within a block. \\
+\textbf{C}. Two threads located in different blocks can synchronize with each other within the kernel. \\
+\textbf{D}. Branches (e.g. if/else) in the kernel can potentially reduce parallelism between threads. \\ \\ 
+Solution: C
 
-\section{All Pairs Shortest Paths}
+\section*{Question 2} 
+Which of the following statements about shared and global memory in CUDA are \textbf{FALSE}? \\ \\
+\textbf{A}. Global memory has the scope of the entire application. \\
+\textbf{B}. Shared memory is usually on-chip and faster than global memory. \\
+\textbf{C}. Global memory has to be declared outside the kernel. \\
+\textbf{D}. Shared memory cannot be accessed by the host. \\ \\
+Solution: C
 
-The naive and obvious solution to All Pairs Shortest Path(APSP) problem is to
-run a Single Source Shortest Path algorithm from each starting vertex
-$v$.  If the graph has arbitrary edge weights, it takes the Bellman-Ford
-algorithm $O(|E||V|^2)$ time to solve APSP.  But there
-are better approaches.
+\section*{Question 3} 
+Which of the following statements about kernel functions in CUDA are \textbf{TRUE}? \\ \\
+\textbf{A}. Kernel functions are called by the host and run on the device. \\
+\textbf{B}. The return type of kernel functions can only be {\em void} \\
+\textbf{C}. We can have multiple kernel invocations in an application. \\
+\textbf{D}. All of the above. \\ \\ 
+Solution: D
 
-\subsection{Floyd-Warshall Algorithm: Dynamic Programming}
+\section*{Question 4}
+In the work-optimal algorithm for computing array maximum discussed in class, \\ \\
+\textbf{A}. the array of size {\em n} is partitioned into {\em (n/log log n)} groups of size {\em O(log log n)}. \\
+\textbf{B}. sequential algorithm is run on each of the groups to get the maximum value of each group. \\
+\textbf{C}. the doubly logarithmic height tree algorithm is used to get the maximum value of the group maximums. \\
+\textbf{D}. All of the above. \\ \\ 
+Solution: D
 
-Label the vertices $1,2,\ldots,n$.
-Define $d^{(k)}(i,j)$ to be the length of a shortest path from $i$
-to $j$, using intermediate vertices from \{$1,2,\ldots,k$\} only.
-Obviously, $d^{(n)}(i,j)$ is the full problem.  
+\section*{Question 5}
+In the work-optimal algorithm for merging two sorted arrays discussed in class, \\ \\ 
+\textbf{A}. the ranks of splitters are computed using the parallel rank-computation algorithm. \\
+\textbf{B}. sublists are merged using the sequential merging algorithm. \\
+\textbf{C}. the overall time complexity is {\em O(log n)}. \\
+\textbf{D}. All of the above. \\ \\ 
+Solution: D
 
-\ldots
+\section*{Question 6}
+In the list ranking algorithm discussed in class, what technique is used to reduce the length of the longest path in the linked structure in each iteration? \\ \\ 
+Solution: Pointer jumping
 
-\section{Transitive Closure}
+\section*{Question 7}
+In the breaking symmetry algorithm discussed in class, what is a possible method to guarantee that initially all nodes have valid coloring? \\ \\
+Solution: Each node could initially have different color by using its unique identifier. 
 
-Our goal is to achieve running time $O(M(n)\log n)$ for APSP where
-$M(n)$ is the time for $n\times n$ matrix multiplication.  Let's see
-if we can achieve this for a simpler but related problem, namely
-{\it Transitive Closure\/}:
-
-\ldots
-
-\section*{References}
-\beginrefs
-\bibentry{AGM97}{\sc N.~Alon}, {\sc Z.~Galil} and {\sc O.~Margalit},
-On the Exponent of the All Pairs Shortest Path Problem,
-{\it Journal of Computer and System Sciences\/}~{\bf 54} (1997),
-pp.~255--262.
-
-\bibentry{F76}{\sc M. L. ~Fredman}, New Bounds on the Complexity of the 
-Shortest Path Problem, {\it SIAM Journal on Computing\/}~{\bf 5} (1976), 
-pp.~83-89.
-\endrefs
-
+\section*{Question 8}
+Briefly describe the upward sweep and downward sweep procedures in the Blelloch Scan algorithm. \\ \\ 
+Solution: \\
+\textit{Upward}: 
+{\em sum[v] = sum[Left[v]] + sum[Right[v]]; } \\
+\textit{Downward}:  
+{\em scan[Left[v]] = scan[v]; scan[Right[v]] = sum[Left[v]] + scan[v]; }
 
 \end{document}
 
